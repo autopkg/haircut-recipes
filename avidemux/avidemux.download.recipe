@@ -3,7 +3,10 @@
 <plist version="1.0">
 <dict>
     <key>Description</key>
-    <string>Download latest avidemux dmg</string>
+    <string>Download latest avidemux dmg. Permission has been granted by FOSSHub to automate downloads of this project. Specifically:
+
+        > If you download a single copy and plan to duplicate that file (inside your internal network) for over a thousand systems or a million, you have our permission.
+        > If you wish to download a file or the same file a thousand times then no, you do not have our permission as this would abuse our service.</string>
     <key>Identifier</key>
     <string>com.github.haircut.download.avidemux</string>
     <key>Input</key>
