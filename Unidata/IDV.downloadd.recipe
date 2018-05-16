@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Description</key>
+    <string>Downloads latest IDV (Integrated Data Viewer) disk image.</string>
+    <key>Identifier</key>
+    <string>com.github.haircut.download.IDV</string>
+    <key>Input</key>
+    <dict>
+        <key>NAME</key>
+        <string>IDV</string>
+    </dict>
+    <key>MinimumVersion</key>
+    <string>1.0.0</string>
+    <key>Process</key>
+    <array>
+        <dict>
+            <key>Processor</key>
+            <string>URLTextSearcher</string>
+            <key>Arguments</key>
+            <dict>
+                <key>url</key>
+                <string>https://www.unidata.ucar.edu/downloads/idv/current/index.jsp</string>
+                <key>re_pattern</key>
+                <string>&lt;h4&gt;IDV (.*?) Installers&lt;/h4&gt;</string>
+                <key>result_output_var_name</key>
+                <string>version</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>URLTextSearcher</string>
+            <key>Arguments</key>
+            <dict>
+                <key>url</key>
+                <string>https://www.unidata.ucar.edu/downloads/idv/current/index.jsp</string>
+                <key>re_pattern</key>
+                <string>&lt;a href="ftp/(idv_.*?_macos_installer.dmg)"&gt;</string>
+                <key>result_output_var_name</key>
+                <string>download_file</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>URLDownloader</string>
+            <key>Arguments</key>
+            <dict>
+                <key>url</key>
+                <string>https://www.unidata.ucar.edu/downloads/idv/current/ftp/%download_file%</string>
+                <key>filename</key>
+                <string>%NAME%.dmg</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>EndOfCheckPhase</string>
+        </dict>
+    </array>
+</dict>
+</plist>
