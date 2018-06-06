@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Description</key>
+    <string>Downloads the latest version of Anaconda Python, then creates a package that installs Anaconda to a known location defined by the PREFIX_DIR key. The intent is to install Anaconda in a location accessible to all users on a system. The default PREFIX_DIR is '/usr/local/anaconda'. A postinstall script symlinks all the binaries in the anaconda 'bin' directory to /usr/local/bin so users do not have to individually update their paths.
+
+Per the parent recipe, different installer types are available. 
+Use INSTALLER_TYPE 'sh' for this recipe to work correctly!
+You can choose the Python 2 or 3 version of Anaconda with the PYTHON_MAJOR_VERSION key.
+
+The CONDARC_CONTENTS file controls what gets written to the "admin" or top-level .condarc path at PREFIX_DIR/.condarc
+In the default configuration using the supplied variables we simply specify the "defaults" package channel. You can specificy whatever you need here.
+! Make sure your spacing for this input variable is valid for YAML syntax !</string>
+    <key>Identifier</key>
+    <string>com.github.haircut.pkg.AnacondaCustom</string>
+    <key>Input</key>
+    <dict>
+        <key>NAME</key>
+        <string>AnacondaCustom</string>
+        <key>INSTALLER_TYPE</key>
+        <string>sh</string>
+        <key>PYTHON_MAJOR_VERSION</key>
+        <string>2</string>
+        <key>PREFIX_DIR</key>
+        <string>/usr/local/anaconda</string>
+        <key>CONDARC_CONTENTS</key>
+        <string># Add default channel
+channels:
+  - defaults</string>
+    </dict>
+    <key>MinimumVersion</key>
+    <string>1.0.0</string>
+    <key>ParentRecipe</key>
+    <string>com.github.hansen-m.download.Anaconda</string>
+    <key>Process</key>
+    <array>
+        <dict>
+            <key>Processor</key>
+            <string>PkgRootCreator</string>
+            <key>Arguments</key>
+            <dict>
+                <key>pkgdirs</key>
+                <dict/>
+                <key>pkgroot</key>
+                <string>%RECIPE_CACHE_DIR%/pkgroot</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Arguments</key>
+            <dict>
+                <key>destination_path</key>
+                <string>%RECIPE_CACHE_DIR%/Scripts/</string>
+                <key>overwrite</key>
+                <true/>
+                <key>source_path</key>
+                <string>%RECIPE_CACHE_DIR%/downloads</string>
+            </dict>
+            <key>Processor</key>
+            <string>Copier</string>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>FileCreator</string>
+            <key>Arguments</key>
+            <dict>
+                <key>file_content</key>
+                <string>#!/bin/bash
+INSTALLDIR=$(dirname $0)
+INSTALLSCRIPT="%filename%"
+PREFIX="%PREFIX_DIR%"
+# Install Anaconda to "prefix" directory defined in autopkg recipe
+/bin/sh "${INSTALLDIR}/${INSTALLSCRIPT}" -b -f -s -p "${PREFIX}"
+# symlink anaconda binaries to /usr/local/bin
+for f in $(ls -d ${PREFIX}/bin/*); do
+    ln -s $f /usr/local/bin
+done
+# Create admin .condarc file under prefix path
+echo "%CONDARC_CONTENTS%" > "${PREFIX}/.condarc"</string>
+                <key>file_mode</key>
+                <string>0755</string>
+                <key>file_path</key>
+                <string>%RECIPE_CACHE_DIR%/Scripts/postinstall</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>PkgCreator</string>
+            <key>Arguments</key>
+            <dict>
+                <key>pkg_request</key>
+                <dict>
+                    <key>chown</key>
+                    <array/>
+                    <key>id</key>
+                    <string>com.continuum.Anaconda.pkg</string>
+                    <key>pkgname</key>
+                    <string>%NAME%-%version%</string>
+                    <key>pkgroot</key>
+                    <string>%RECIPE_CACHE_DIR%/pkgroot</string>
+                    <key>pkgtype</key>
+                    <string>flat</string>
+                    <key>scripts</key>
+                    <string>Scripts</string>
+                    <key>version</key>
+                    <string>%version%</string>
+                </dict>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>PathDeleter</string>
+            <key>Arguments</key>
+            <dict>
+                <key>path_list</key>
+                <array>
+                    <string>%pkgroot%</string>
+                    <string>%RECIPE_CACHE_DIR%/Scripts</string>
+                </array>
+            </dict>
+        </dict>
+    </array>
+</dict>
+</plist>
