@@ -4,7 +4,7 @@ The `AnacondaCustom` pkg recipe allows you to create package that will do a
 customizable installation of Anaconda.
 
 The standard .pkg provided by Continuum does not allow you to specify an 
-installation directory, skip attempts modify the logged-in-user's Bash path, 
+installation directory, skip attempts to modify the logged-in-user's Bash path, 
 etc. Their shell script installation, however, does provide this flexibility.
 
 This recipe builds off hansen-m's excellent and flexible [Anaconda download 
@@ -21,18 +21,22 @@ a few additional keys.
 
 - `NAME`
     The name of your package, which will be output in the format of `%NAME%-%version%.pkg`
+
     Default: `AnacondaCustom`
 - `INSTALLER_TYPE`
     Whether to download the `pkg` installer or the `sh` shell script. You must
     use the `sh` option for this recipe to work correctly!
+
     Default: `sh`
 - `PYTHON_MAJOR_VERSION`
     The major version of Python for which to download a compatible version of
     Anaconda. Use `2` or `3`
+
     Default: `3`
 - `PREFIX_DIR`
     The target directory to which you want to install Anaconda, or as Continuum
     calls it, the "prefix directory."
+    
     Default: `usr/local/anaconda`
 - `CONDARC_CONTENTS`
     Contents of the top-level or "admin" `.condarc` file. This file is placed
