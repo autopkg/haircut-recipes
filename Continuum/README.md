@@ -41,7 +41,7 @@ a few additional keys.
 - `CONDARC_CONTENTS`
     Contents of the top-level or "admin" `.condarc` file. This file is placed
     in the "prefix directory" and automatically loaded for all users. See the
-    Continuum documenation for [using an admin .condarc file](https://conda.io/docs/user-guide/configuration/admin-multi-user-install.html)
+    Continuum documentation for [using an admin .condarc file](https://conda.io/docs/user-guide/configuration/admin-multi-user-install.html)
 
     **Important**: Make very sure this input key is valid YAML syntax, paying 
     special attention to indentation. The multiline string you place in your
