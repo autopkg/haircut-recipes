@@ -32,11 +32,11 @@ a few additional keys.
     The major version of Python for which to download a compatible version of
     Anaconda. Use `2` or `3`
 
-    Default: `3`
+    Default: `2`
 - `PREFIX_DIR`
     The target directory to which you want to install Anaconda, or as Continuum
     calls it, the "prefix directory."
-    
+
     Default: `usr/local/anaconda`
 - `CONDARC_CONTENTS`
     Contents of the top-level or "admin" `.condarc` file. This file is placed
