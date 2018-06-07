@@ -38,6 +38,8 @@ channels:
         <dict>
             <key>Processor</key>
             <string>PkgRootCreator</string>
+            <key>Comment</key>
+            <string>Create a blank pkg root; just so we can package the scripts using PkgCreator</string>
             <key>Arguments</key>
             <dict>
                 <key>pkgdirs</key>
@@ -47,6 +49,16 @@ channels:
             </dict>
         </dict>
         <dict>
+            <key>Processor</key>
+            <string>Copier</string>
+            <key>Comment</key>
+            <string>Copy the 'downloads' folder to a directory named 'Scripts'.
+This works around a limitation of the Copier processor where copying a single 
+file will not create missing parent directories. Copying an directory to a 
+non-existent path will work as the call to shutil.copytree in the Copier 
+processor will create missing parent directories. This allows us to create a 
+payload-free package that bundles the Anaconda installer script and our
+postinstall script to run it with our custom options.</string>
             <key>Arguments</key>
             <dict>
                 <key>destination_path</key>
@@ -56,12 +68,14 @@ channels:
                 <key>source_path</key>
                 <string>%RECIPE_CACHE_DIR%/downloads</string>
             </dict>
-            <key>Processor</key>
-            <string>Copier</string>
         </dict>
         <dict>
             <key>Processor</key>
             <string>FileCreator</string>
+            <key>Comment</key>
+            <string>Create the postinstall script to run the Anaconda install
+script, symlink the Anaconda binaries to /usr/local/bin, and populate the
+admin-level .condarc file</string>
             <key>Arguments</key>
             <dict>
                 <key>file_content</key>
@@ -86,6 +100,8 @@ echo "%CONDARC_CONTENTS%" > "${PREFIX}/.condarc"</string>
         <dict>
             <key>Processor</key>
             <string>PkgCreator</string>
+            <key>Comment</key>
+            <string>Create our pkg</string>
             <key>Arguments</key>
             <dict>
                 <key>pkg_request</key>
@@ -110,6 +126,8 @@ echo "%CONDARC_CONTENTS%" > "${PREFIX}/.condarc"</string>
         <dict>
             <key>Processor</key>
             <string>PathDeleter</string>
+            <key>Comment</key>
+            <string>Remove temporary directories used for packaging.</string>
             <key>Arguments</key>
             <dict>
                 <key>path_list</key>
