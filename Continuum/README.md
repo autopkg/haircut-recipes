@@ -37,7 +37,7 @@ a few additional keys.
     The target directory to which you want to install Anaconda, or as Continuum
     calls it, the "prefix directory."
 
-    Default: `usr/local/anaconda`
+    Default: `/usr/local/anaconda`
 - `CONDARC_CONTENTS`
     Contents of the top-level or "admin" `.condarc` file. This file is placed
     in the "prefix directory" and automatically loaded for all users. See the
