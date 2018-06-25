@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Description</key>
+    <string>Downloads latest MakeMKV disk image.</string>
+    <key>Identifier</key>
+    <string>com.github.haircut.download.MakeMKV</string>
+    <key>Input</key>
+    <dict>
+        <key>NAME</key>
+        <string>MakeMKV</string>
+        <key>DOWNLOAD_PAGE</key>
+        <string>http://makemkv.com/download</string>
+        <key>DOWNLOAD_PATTERN</key>
+        <string>href='/download/(makemkv_.*?_osx.dmg)'&gt;MakeMKV</string>
+    </dict>
+    <key>MinimumVersion</key>
+    <string>1.0.0</string>
+    <key>Process</key>
+    <array>
+        <dict>
+            <key>Processor</key>
+            <string>URLTextSearcher</string>
+            <key>Arguments</key>
+            <dict>
+                <key>url</key>
+                <string>%DOWNLOAD_PAGE%</string>
+                <key>re_pattern</key>
+                <string>%DOWNLOAD_PATTERN%</string>
+                <key>result_output_var_name</key>
+                <string>dmg_filename</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>URLDownloader</string>
+            <key>Arguments</key>
+            <dict>
+                <key>url</key>
+                <string>%DOWNLOAD_PAGE%/%dmg_filename%</string>
+                <key>filename</key>
+                <string>%NAME%.dmg</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>EndOfCheckPhase</string>
+        </dict>
+    </array>
+</dict>
+</plist>
