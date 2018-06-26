@@ -25,17 +25,6 @@
 'Invalid version component error' with autopkgserver. To avoid this we simply trust the version number passed on from the 
 parent download recipe instead of using AppDmgVersioner.</string>
         </dict>
-        <dict>
-            <key>Processor</key>
-            <string>PathDeleter</string>
-            <key>Arguments</key>
-            <dict>
-                <key>path_list</key>
-                <array>
-                    <string>%RECIPE_CACHE_DIR%/payload</string>
-                </array>
-            </dict>
-        </dict>
     </array>
 </dict>
 </plist>
