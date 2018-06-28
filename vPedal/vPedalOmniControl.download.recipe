@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Description</key>
+    <string>Downloads latest vPedal OmniControl zip file.</string>
+    <key>Identifier</key>
+    <string>com.github.haircut.download.vPedalOmniControl</string>
+    <key>Input</key>
+    <dict>
+        <key>NAME</key>
+        <string>vPedalOmniControl</string>
+        <key>DOWNLOAD_PAGE</key>
+        <string>https://www.vpedal.com/?page_id=378</string>
+        <key>SEARCH_PATTERN</key>
+        <string>href="(https://www.vpedal.com/wp-content/uploads/.*?.zip)"&gt;Download&lt;/a&gt;</string>
+    </dict>
+    <key>MinimumVersion</key>
+    <string>1.0.0</string>
+    <key>Process</key>
+    <array>
+        <dict>
+            <key>Processor</key>
+            <string>URLTextSearcher</string>
+            <key>Arguments</key>
+            <dict>
+                <key>url</key>
+                <string>%DOWNLOAD_PAGE%</string>
+                <key>re_pattern</key>
+                <string>%SEARCH_PATTERN%</string>
+                <key>result_output_var_name</key>
+                <string>zip_url</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>URLDownloader</string>
+            <key>Arguments</key>
+            <dict>
+                <key>url</key>
+                <string>%zip_url%</string>
+                <key>filename</key>
+                <string>%NAME%.zip</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>EndOfCheckPhase</string>
+        </dict>
+    </array>
+</dict>
+</plist>
