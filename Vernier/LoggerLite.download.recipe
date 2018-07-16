@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Description</key>
+    <string>Downloads latest Logger Lite disk image. This recipe also outputs the downloaded version for convenience and ingestion by child recipes.</string>
+    <key>Identifier</key>
+    <string>com.github.haircut.download.LoggerLite</string>
+    <key>Input</key>
+    <dict>
+        <key>NAME</key>
+        <string>LoggerLite</string>
+    </dict>
+    <key>MinimumVersion</key>
+    <string>1.0.0</string>
+    <key>Process</key>
+    <array>
+        <dict>
+            <key>Processor</key>
+            <string>URLTextSearcher</string>
+            <key>Arguments</key>
+            <dict>
+                <key>url</key>
+                <string>https://www.vernier.com/products/software/logger-lite/</string>
+                <key>re_pattern</key>
+                <string>Version (.*?). Released &lt;time datetime=</string>
+                <key>result_output_var_name</key>
+                <string>version</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>URLTextSearcher</string>
+            <key>Arguments</key>
+            <dict>
+                <key>url</key>
+                <string>https://www.vernier.com/products/software/logger-lite/</string>
+                <key>re_pattern</key>
+                <string>&lt;a href="(http://www2.vernier.com/download/.*?.dmg)" class="ga-software-download button download" data-title="Click to download"&gt;</string>
+                <key>result_output_var_name</key>
+                <string>dmg_url</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>URLDownloader</string>
+            <key>Arguments</key>
+            <dict>
+                <key>url</key>
+                <string>%dmg_url%</string>
+                <key>filename</key>
+                <string>%NAME%.dmg</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>EndOfCheckPhase</string>
+        </dict>
+    </array>
+</dict>
+</plist>
