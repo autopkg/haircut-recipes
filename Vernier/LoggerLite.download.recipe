@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Description</key>
-    <string>Downloads latest Logger Lite disk image. This recipe also outputs the downloaded version for convenience and ingestion by child recipes.</string>
+    <string>Downloads latest Logger Lite disk image.</string>
     <key>Identifier</key>
     <string>com.github.haircut.download.LoggerLite</string>
     <key>Input</key>
@@ -15,19 +15,6 @@
     <string>1.0.0</string>
     <key>Process</key>
     <array>
-        <dict>
-            <key>Processor</key>
-            <string>URLTextSearcher</string>
-            <key>Arguments</key>
-            <dict>
-                <key>url</key>
-                <string>https://www.vernier.com/products/software/logger-lite/</string>
-                <key>re_pattern</key>
-                <string>Version (.*?). Released &lt;time datetime=</string>
-                <key>result_output_var_name</key>
-                <string>version</string>
-            </dict>
-        </dict>
         <dict>
             <key>Processor</key>
             <string>URLTextSearcher</string>
