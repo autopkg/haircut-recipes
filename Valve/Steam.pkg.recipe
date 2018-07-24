@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Description</key>
+    <string>Downloads the latest the Steam disk image and creates a versioned package.
+
+Please note that the resultant package simply installs Steam.app to /Applications, but upon first launch, the Steam update process will download about 180 MB of assets to complete the installation. These support files are downloaded to ~/Library/Application Support/Steam for the current user opening the app. These assets must be downloaded for each user on the system.</string>
+    <key>Identifier</key>
+    <string>com.github.haircut.pkg.Steam</string>
+    <key>Input</key>
+    <dict>
+        <key>NAME</key>
+        <string>Steam</string>
+    </dict>
+    <key>MinimumVersion</key>
+    <string>1.0.0</string>
+    <key>ParentRecipe</key>
+    <string>com.github.haircut.download.Steam</string>
+    <key>Process</key>
+    <array>
+        <dict>
+            <key>Processor</key>
+            <string>Versioner</string>
+            <key>Comment</key>
+            <string>The Steam app bundle does not have a CFBundleShortVersionString attribute so we have to use CFBundleVersion instead.</string>
+            <key>Arguments</key>
+            <dict>
+                <key>input_plist_path</key>
+                <string>%pathname%/Steam.app/Contents/Info.plist</string>
+                <key>plist_version_key</key>
+                <string>CFBundleVersion</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>AppPkgCreator</string>
+        </dict>
+    </array>
+</dict>
+</plist>
