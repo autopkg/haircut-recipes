@@ -23,20 +23,7 @@
                 <key>url</key>
                 <string>https://formlabs.com/tools/preform/</string>
                 <key>re_pattern</key>
-                <string>&lt;h1&gt;PreForm Software &lt;small&gt;(.*?)&lt;/small&gt;</string>
-                <key>result_output_var_name</key>
-                <string>version</string>
-            </dict>
-        </dict>
-        <dict>
-            <key>Processor</key>
-            <string>URLTextSearcher</string>
-            <key>Arguments</key>
-            <dict>
-                <key>url</key>
-                <string>https://formlabs.com/tools/preform/</string>
-                <key>re_pattern</key>
-                <string>href="(https://s3.amazonaws.com/FormlabsReleases/Release/.*?/PreForm_.*?_release_origin_release_.*?.dmg)"</string>
+                <string>href="(https://s3.amazonaws.com/FormlabsReleases/Release/.*?/.*?.dmg)"</string>
                 <key>result_output_var_name</key>
                 <string>dmg_url</string>
             </dict>
@@ -49,7 +36,7 @@
                 <key>url</key>
                 <string>%dmg_url%</string>
                 <key>filename</key>
-                <string>%NAME%-%version%.dmg</string>
+                <string>%NAME%.dmg</string>
             </dict>
         </dict>
         <dict>
