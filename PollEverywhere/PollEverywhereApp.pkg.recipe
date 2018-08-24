@@ -19,6 +19,19 @@
     <array>
         <dict>
             <key>Processor</key>
+            <string>Versioner</string>
+            <key>Comment</key>
+            <string>Added 2018-08-24 - App bundle in 2.17.0 release does not contain CFBundleShortVersionString key. Using CFBundleVersion instead.</string>
+            <key>Arguments</key>
+            <dict>
+                <key>input_plist_path</key>
+                <string>%pathname%/Poll Everywhere.app/Contents/Info.plist</string>
+                <key>plist_version_key</key>
+                <string>CFBundleVersion</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
             <string>AppPkgCreator</string>
         </dict>
     </array>
