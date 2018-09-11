@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Description</key>
+    <string>Downloads latest TOPCAT disk image and creates a package. Requires com.github.homebysix.FindAndReplace/FindAndReplace.</string>
+    <key>Identifier</key>
+    <string>com.github.haircut.pkg.TOPCAT</string>
+    <key>Input</key>
+    <dict>
+        <key>NAME</key>
+        <string>TOPCAT</string>
+    </dict>
+    <key>MinimumVersion</key>
+    <string>1.0.0</string>
+    <key>ParentRecipe</key>
+    <string>com.github.haircut.download.TOPCAT</string>
+    <key>Process</key>
+    <array>
+        <dict>
+            <key>Processor</key>
+            <string>AppDmgVersioner</string>
+            <key>Arguments</key>
+            <dict>
+                <key>dmg_path</key>
+                <string>%pathname%</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>com.github.homebysix.FindAndReplace/FindAndReplace</string>
+            <key>Comment</key>
+            <string>Required to work around a dash in the app version string which causes pkgbuild to complain</string>
+            <key>Arguments</key>
+            <dict>
+                <key>find</key>
+                <string>-</string>
+                <key>replace</key>
+                <string>.</string>
+                <key>input_string</key>
+                <string>%version%</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>AppPkgCreator</string>
+            <key>Comment</key>
+            <string>Uses the 'output_string' var from previous proccessor as the version number</string>
+            <key>Arguments</key>
+            <dict>
+                <key>dmg_path</key>
+                <string>%pathname%</string>
+                <key>version</key>
+                <string>%output_string%</string>
+            </dict>
+        </dict>
+    </array>
+</dict>
+</plist>
