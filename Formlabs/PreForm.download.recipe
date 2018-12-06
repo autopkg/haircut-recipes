@@ -17,24 +17,11 @@
     <array>
         <dict>
             <key>Processor</key>
-            <string>URLTextSearcher</string>
-            <key>Arguments</key>
-            <dict>
-                <key>url</key>
-                <string>https://formlabs.com/tools/preform/</string>
-                <key>re_pattern</key>
-                <string>href="(https://s3.amazonaws.com/FormlabsReleases/Release/.*?/.*?.dmg)"</string>
-                <key>result_output_var_name</key>
-                <string>dmg_url</string>
-            </dict>
-        </dict>
-        <dict>
-            <key>Processor</key>
             <string>URLDownloader</string>
             <key>Arguments</key>
             <dict>
                 <key>url</key>
-                <string>%dmg_url%</string>
+                <string>https://formlabs.com/download-preform-mac/</string>
                 <key>filename</key>
                 <string>%NAME%.dmg</string>
             </dict>
@@ -42,6 +29,17 @@
         <dict>
             <key>Processor</key>
             <string>EndOfCheckPhase</string>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>CodeSignatureVerifier</string>
+            <key>Arguments</key>
+            <dict>
+                <key>input_path</key>
+                <string>%pathname%/PreForm.app</string>
+                <key>requirement</key>
+                <string>identifier "com.formlabs.PreForm" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = KVPE3R79SR</string>
+            </dict>
         </dict>
     </array>
 </dict>
