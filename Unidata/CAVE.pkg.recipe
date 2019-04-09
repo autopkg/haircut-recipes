@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Description</key>
-    <string>Downloads the latest version of CAVE and creates a versioned package. Note: Requires com.github.homebysix.VersionSplitter/VersionSplitter to handle versioning.</string>
+    <string>Downloads the latest version of CAVE and creates a versioned package.</string>
     <key>Identifier</key>
     <string>com.github.haircut.pkg.CAVE</string>
     <key>Input</key>
@@ -24,17 +24,6 @@
             <dict>
                 <key>input_plist_path</key>
                 <string>%pathname%/Cave.app/Contents/Info.plist</string>
-            </dict>
-        </dict>
-        <dict>
-            <key>Processor</key>
-            <string>com.github.homebysix.VersionSplitter/VersionSplitter</string>
-            <key>Comment</key>
-            <string>This processor handles an invalid hypen in the 18.x CFBundleShortVersionString</string>
-            <key>Arguments</key>
-            <dict>
-                <key>split_on</key>
-                <string>-</string>
             </dict>
         </dict>
         <dict>
