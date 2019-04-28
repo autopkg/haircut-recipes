@@ -1,6 +1,11 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
-# Copyright 2019 Matthew Warren / haircvut
+# Copyright 2017 Graham Pugh
+# Copyright 2019 Matthew Warren / haircut
+#
+# Based on the 'Slacker' PostProcessor by Graham R Pugh
+# https://grahamrpugh.com/2017/12/22/slack-for-autopkg-jssimporter.html
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
