@@ -32,32 +32,16 @@ from autopkglib import Processor, ProcessorError
 __all__ = ["HangoutsChatNotifier"]
 
 class HangoutsChatNotifier(Processor):
-    description = ("Posts a Card notification to a Hangouts Chat room"
-                   "via webhook based on output of a JSSImporter run.")
+    description = ("Posts a Simple Text message to a Hangouts Chat room"
+                   "via webhook based on output of an autopkg run.")
     input_variables = {
-        "JSS_URL": {
+        "NAME": {
             "required": False,
-            "description": ("JSS_URL.")
+            "description": ("Title of the ")
         },
-        "policy_category": {
-            "required": False,
-            "description": ("Policy Category.")
-        },
-        "category": {
-            "required": False,
-            "description": ("Package Category.")
-        },
-        "prod_name": {
-            "required": False,
-            "description": ("Title (NAME)")
-        },
-        "jss_changed_objects": {
+        "version": {
             "required": False,
             "description": ("Dictionary of added or changed values.")
-        },
-        "jss_importer_summary_result": {
-            "required": False,
-            "description": ("Description of interesting results.")
         },
         "hangoutschat_webhook_url": {
             "required": False,
@@ -70,74 +54,19 @@ class HangoutsChatNotifier(Processor):
     __doc__ = description
 
     def main(self):
-        JSS_URL = self.env.get("JSS_URL")
-        policy_category = self.env.get("policy_category")
-        category = self.env.get("category")
-        prod_name = self.env.get("prod_name")
-        jss_changed_objects = self.env.get("jss_changed_objects")
-        jss_importer_summary_result = self.env.get("jss_importer_summary_result")
+        app_name = self.env.get("NAME")
+        app_version = self.env.get("version")
         webhook_url = self.env.get("hangoutschat_webhook_url")
-
-        if jss_changed_objects:
-            jss_policy_name = "%s" % jss_importer_summary_result["data"]["Policy"]
-            jss_policy_version = "%s" % jss_importer_summary_result["data"]["Version"]
-            jss_uploaded_package = "%s" % jss_importer_summary_result["data"]["Package"]
-            print "JSS address: %s" % JSS_URL
-            print "Title: %s" % prod_name
-            print "Policy: %s" % jss_policy_name
-            print "Version: %s" % jss_policy_version
-            print "Category: %s" % category
-            print "Policy Category: %s" % policy_category
-            print "Package: %s" % jss_uploaded_package
-
-            hangoutschat_data = {
-                "cards": [
-                    {
-                        "header": {
-                            "title": "New item added to JSS",
-                            "subtitle": JSS_URL
-                        },
-                        "sections": [
-                            {
-                                "widgets": [
-                                    {
-                                        "keyValue": {
-                                            "topLabel": "Title",
-                                            "content": prod_name
-                                        }
-                                    },
-                                    {
-                                        "keyValue": {
-                                            "topLabel": "Version",
-                                            "content": jss_policy_version
-                                        }
-                                    },
-                                    {
-                                        "keyValue": {
-                                            "topLabel": "Category",
-                                            "content": category
-                                        }
-                                    },
-                                    {
-                                        "keyValue": {
-                                            "topLabel": "Policy",
-                                            "content": jss_policy_name
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
-
-
-            response = requests.post(webhook_url, json=hangoutschat_data)
-            if response.status_code != 200:
-                raise ValueError(
-                                'Request to Hangouts Chat returned an error %s, the response is:\n%s'
-                                % (response.status_code, response.text)
-                                )
+        msg = "✨ *{}* version _{}_ was downloaded by autopkg".format(app_name, app_version)
+        hangoutschat_data = {
+            "text": msg
+        }
+        response = requests.post(webhook_url, json=hangoutschat_data)
+        if response.status_code != 200:
+            raise ValueError(
+                            'Request to Hangouts Chat returned an error %s, the response is:\n%s'
+                            % (response.status_code, response.text)
+                            )
 
 
 if __name__ == "__main__":
