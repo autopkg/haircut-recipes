@@ -59,7 +59,7 @@ class HangoutsChatNotifier(Processor):
             "required": False,
             "description": ("Description of interesting results.")
         },
-        "webhook_url": {
+        "hangoutschat_webhook_url": {
             "required": False,
             "description": ("Hangouts Chat webhook url.")
         }
@@ -76,7 +76,7 @@ class HangoutsChatNotifier(Processor):
         prod_name = self.env.get("prod_name")
         jss_changed_objects = self.env.get("jss_changed_objects")
         jss_importer_summary_result = self.env.get("jss_importer_summary_result")
-        webhook_url = self.env.get("webhook_url")
+        webhook_url = self.env.get("hangoutschat_webhook_url")
 
         if jss_changed_objects:
             jss_policy_name = "%s" % jss_importer_summary_result["data"]["Policy"]
