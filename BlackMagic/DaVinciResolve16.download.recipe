@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Description</key>
+    <string>Downloads latest version of DaVinci Resolve 16.
+
+This recipe is a modification of Tim Sutton's original v14
+recipe.
+
+This product requires registration in order to download, so
+you _must_ override all input variables beginning with 'REG_'
+and they must contain data.
+
+Notably, REG_STATE and REG_COUNTRY must contain sane values:
+- REG_COUNTRY is of the form 'us', 'ca', etc.
+- REG_STATE is a proper name, i.e. 'Maryland'.
+</string>
+    <key>Identifier</key>
+    <string>com.github.haircut.download.DaVinciResolve16</string>
+    <key>ParentRecipe</key>
+    <string>com.github.timsutton.download.davinciresolve14</string>
+    <key>Input</key>
+    <dict>
+        <!-- Version 16 updates _may_ contain 'Update' in the title, but
+        we also want to avoid capturing the 'Studio Update' versions -->
+        <key>PRODUCT_NAME_PATTERN</key>
+        <string>^DaVinci Resolve (?P&lt;version&gt;16(\.\d+)*)( Update)*$</string>
+        <key>NAME</key>
+        <string>DaVinciResolve16</string>
+        <key>REG_FIRSTNAME</key>
+        <string></string>
+        <key>REG_LASTNAME</key>
+        <string></string>
+        <key>REG_EMAIL</key>
+        <string></string>
+        <key>REG_PHONE</key>
+        <string></string>
+        <key>REG_CITY</key>
+        <string></string>
+        <key>REG_STATE</key>
+        <string></string>
+        <key>REG_COUNTRY</key>
+        <string></string>
+    </dict>
+</dict>
+</plist>
