@@ -11,7 +11,7 @@
         <key>NAME</key>
         <string>MakeMKV</string>
         <key>DOWNLOAD_PAGE</key>
-        <string>http://makemkv.com/download</string>
+        <string>https://makemkv.com/download</string>
         <key>DOWNLOAD_PATTERN</key>
         <string>href='/download/(makemkv_.*?_osx.dmg)'&gt;MakeMKV</string>
     </dict>
