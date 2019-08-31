@@ -20,6 +20,8 @@
 # limitations under the License.
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 import json
 import os.path
 import requests
@@ -82,13 +84,13 @@ class HangoutsChatJSSNotifier(Processor):
             jss_policy_name = "%s" % jss_importer_summary_result["data"]["Policy"]
             jss_policy_version = "%s" % jss_importer_summary_result["data"]["Version"]
             jss_uploaded_package = "%s" % jss_importer_summary_result["data"]["Package"]
-            print "JSS address: %s" % JSS_URL
-            print "Title: %s" % prod_name
-            print "Policy: %s" % jss_policy_name
-            print "Version: %s" % jss_policy_version
-            print "Category: %s" % category
-            print "Policy Category: %s" % policy_category
-            print "Package: %s" % jss_uploaded_package
+            print("JSS address: %s" % JSS_URL)
+            print("Title: %s" % prod_name)
+            print("Policy: %s" % jss_policy_name)
+            print("Version: %s" % jss_policy_version)
+            print("Category: %s" % category)
+            print("Policy Category: %s" % policy_category)
+            print("Package: %s" % jss_uploaded_package)
 
             hangoutschat_data = {
                 "cards": [
