@@ -11,7 +11,7 @@
         <key>NAME</key>
         <string>VDMX5</string>
         <key>DOWNLOAD_URL</key>
-        <string>http://vidvox.net/download/vdmx_demo</string>
+        <string>https://vidvox.net/download/vdmx_demo</string>
     </dict>
     <key>MinimumVersion</key>
     <string>1.0.0</string>
