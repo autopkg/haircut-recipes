@@ -20,12 +20,11 @@
 # limitations under the License.
 
 
-import json
-import os.path
-import requests
-import subprocess
-from autopkglib import Processor, ProcessorError
+from __future__ import absolute_import, print_function
 
+import requests
+
+from autopkglib import Processor, ProcessorError
 
 # Set the webhook_url to the one provided by Hangouts Chat
 # See https://developers.google.com/hangouts/chat/how-tos/webhooks
@@ -82,13 +81,13 @@ class HangoutsChatJSSNotifier(Processor):
             jss_policy_name = "%s" % jss_importer_summary_result["data"]["Policy"]
             jss_policy_version = "%s" % jss_importer_summary_result["data"]["Version"]
             jss_uploaded_package = "%s" % jss_importer_summary_result["data"]["Package"]
-            print "JSS address: %s" % JSS_URL
-            print "Title: %s" % prod_name
-            print "Policy: %s" % jss_policy_name
-            print "Version: %s" % jss_policy_version
-            print "Category: %s" % category
-            print "Policy Category: %s" % policy_category
-            print "Package: %s" % jss_uploaded_package
+            print("JSS address: %s" % JSS_URL)
+            print("Title: %s" % prod_name)
+            print("Policy: %s" % jss_policy_name)
+            print("Version: %s" % jss_policy_version)
+            print("Category: %s" % category)
+            print("Policy Category: %s" % policy_category)
+            print("Package: %s" % jss_uploaded_package)
 
             hangoutschat_data = {
                 "cards": [

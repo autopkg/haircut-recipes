@@ -20,12 +20,11 @@
 # limitations under the License.
 
 
-import json
-import os.path
-import requests
-import subprocess
-from autopkglib import Processor, ProcessorError
+from __future__ import absolute_import
 
+import requests
+
+from autopkglib import Processor, ProcessorError
 
 # Set the webhook_url to the one provided by Hangouts Chat
 # See https://developers.google.com/hangouts/chat/how-tos/webhooks
