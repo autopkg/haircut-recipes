@@ -43,7 +43,12 @@ channels:
             <key>Arguments</key>
             <dict>
                 <key>pkgdirs</key>
-                <dict/>
+                <dict>
+                    <key>etc</key>
+                    <string>0755</string>
+                    <key>etc/paths.d</key>
+                    <string>0755</string>
+                </dict>
                 <key>pkgroot</key>
                 <string>%RECIPE_CACHE_DIR%/pkgroot</string>
             </dict>
@@ -74,8 +79,7 @@ postinstall script to run it with our custom options.</string>
             <string>FileCreator</string>
             <key>Comment</key>
             <string>Create the postinstall script to run the Anaconda install
-script, symlink the Anaconda binaries to /usr/local/bin, and populate the
-admin-level .condarc file</string>
+script and populate the admin-level .condarc file</string>
             <key>Arguments</key>
             <dict>
                 <key>file_content</key>
@@ -85,16 +89,25 @@ INSTALLSCRIPT="%filename%"
 PREFIX="%PREFIX_DIR%"
 # Install Anaconda to "prefix" directory defined in autopkg recipe
 /bin/sh "${INSTALLDIR}/${INSTALLSCRIPT}" -b -f -s -p "${PREFIX}"
-# symlink anaconda binaries to /usr/local/bin
-for f in $(ls -d ${PREFIX}/bin/*); do
-    ln -s $f /usr/local/bin
-done
 # Create admin .condarc file under prefix path
 echo "%CONDARC_CONTENTS%" > "${PREFIX}/.condarc"</string>
                 <key>file_mode</key>
                 <string>0755</string>
                 <key>file_path</key>
                 <string>%RECIPE_CACHE_DIR%/Scripts/postinstall</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>FileCreator</string>
+            <key>Arguments</key>
+            <dict>
+                <key>file_path</key>
+                <string>%RECIPE_CACHE_DIR%/pkgroot/etc/paths.d/anaconda</string>
+                <key>file_mode</key>
+                <string>0644</string>
+                <key>file_content</key>
+                <string>%PREFIX_DIR%/bin</string>
             </dict>
         </dict>
         <dict>
