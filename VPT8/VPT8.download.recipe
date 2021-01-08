@@ -11,7 +11,7 @@
         <key>NAME</key>
         <string>VPT8</string>
         <key>DOWNLOAD_URL</key>
-        <string>http://nervousvision.com/vpt/vpt8-osx.zip</string>
+        <string>https://nervousvision.com/vpt/vpt8-osx.zip</string>
     </dict>
     <key>MinimumVersion</key>
     <string>1.0.0</string>
