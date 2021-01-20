@@ -63,7 +63,7 @@
 			<dict>
 				<key>input_path</key>
 				<string>%pathname%/Integrated Data Viewer Installer.app</string>
-				<key>requirements</key>
+				<key>requirement</key>
 				<string>always</string>
 			</dict>
 		</dict>

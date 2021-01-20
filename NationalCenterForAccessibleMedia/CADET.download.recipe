@@ -50,7 +50,7 @@
             <dict>
                 <key>input_path</key>
                 <string>%pathname%/CADET.app</string>
-                <key>requirements</key>
+                <key>requirement</key>
                 <string>identifier "org.wgbh.ncam.cadet" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Bradley Botkin (E9484PTCU6)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
             </dict>
         </dict>
