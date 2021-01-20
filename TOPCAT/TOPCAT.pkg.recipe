@@ -48,8 +48,6 @@
             <string>Uses the 'output_string' var from previous proccessor as the version number</string>
             <key>Arguments</key>
             <dict>
-                <key>dmg_path</key>
-                <string>%pathname%</string>
                 <key>version</key>
                 <string>%output_string%</string>
             </dict>
