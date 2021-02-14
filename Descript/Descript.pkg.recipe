@@ -8,8 +8,6 @@
 	<string>com.github.haircut.pkg.Descript</string>
 	<key>Input</key>
 	<dict>
-		<key>BUNDLE_ID</key>
-		<string>com.descript.Descript</string>
 		<key>NAME</key>
 		<string>Descript</string>
 	</dict>
@@ -20,23 +18,23 @@
 	<key>Process</key>
 	<array>
 		<dict>
-			<key>Processor</key>
-			<string>AppDmgVersioner</string>
 			<key>Arguments</key>
 			<dict>
 				<key>dmg_path</key>
 				<string>%pathname%</string>
 			</dict>
+			<key>Processor</key>
+			<string>AppDmgVersioner</string>
 		</dict>
 		<dict>
-			<key>Processor</key>
-			<string>AppPkgCreator</string>
 			<key>Arguments</key>
 			<dict>
 				<key>app_path</key>
-                <string>%pathname%/Descript.app</string>
-            </dict>
-        </dict>
+				<string>%pathname%/Descript.app</string>
+			</dict>
+			<key>Processor</key>
+			<string>AppPkgCreator</string>
+		</dict>
 	</array>
 </dict>
 </plist>
