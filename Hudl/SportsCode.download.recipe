@@ -27,7 +27,7 @@
                 <key>url</key>
                 <string>%DOWNLOAD_URL%</string>
                 <key>re_pattern</key>
-                <string>href="(https://hudl-content.s3.amazonaws.com/craft/elite/downloads/SportsCode-?\d+?(\.|-)\d+?(\.|-)\d+?\.dmg\.zip\?mtime=.*?)"</string>
+                <string>href="(https://hudl-content.s3.amazonaws.com/craft/elite/downloads/SportsCode-?\d+?[\.-]\d+?[\.-]\d+?\.dmg\.zip\?mtime=.*?)"</string>
                 <key>request_headers</key>
                 <dict>
                     <key>user-agent</key>
@@ -69,7 +69,7 @@
             <key>Arguments</key>
             <dict>
                 <key>input_path</key>
-                <string>%RECIPE_CACHE_DIR%/%NAME%/SportsCode.dmg/SportsCode.app</string>
+                <string>%RECIPE_CACHE_DIR%/%NAME%/%NAME%*.dmg/%NAME%.app</string>
                 <key>requirement</key>
                 <string>identifier "com.vigital.SportsCode" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "4M6T2C723P"</string>
                 <key>strict_verification</key>
