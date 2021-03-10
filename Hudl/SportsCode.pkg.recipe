@@ -19,13 +19,22 @@
     <array>
         <dict>
             <key>Processor</key>
+            <string>FileFinder</string>
+            <key>Arguments</key>
+            <dict>
+                <key>pattern</key>
+                <string>%RECIPE_CACHE_DIR%/%NAME%/%NAME%*.dmg</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
             <string>AppDmgVersioner</string>
             <key>Comment</key>
             <string>The parent download recipe already unzips the .dmg.zip provided by the vendor, so we just reuse that instead of unarchiving again.</string>
             <key>Arguments</key>
             <dict>
                 <key>dmg_path</key>
-                <string>%RECIPE_CACHE_DIR%/%NAME%/%NAME%.dmg</string>
+                <string>%found_filename%</string>
             </dict>
         </dict>
         <dict>
@@ -34,7 +43,7 @@
             <key>Arguments</key>
             <dict>
                 <key>app_path</key>
-                <string>%RECIPE_CACHE_DIR%/%NAME%/SportsCode.dmg/SportsCode.app</string>
+                <string>%found_filename%/%NAME%.app</string>
             </dict>
         </dict>
         <dict>
