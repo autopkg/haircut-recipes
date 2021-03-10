@@ -10,6 +10,8 @@
     <dict>
         <key>NAME</key>
         <string>HudlSportscode</string>
+        <key>APP_NAME</key>
+        <string>Hudl Sportscode</string>
     </dict>
     <key>MinimumVersion</key>
     <string>1.0.0</string>
@@ -19,13 +21,20 @@
     <array>
         <dict>
             <key>Processor</key>
+            <string>FileFinder</string>
+            <key>Arguments</key>
+            <dict>
+                <key>pattern</key>
+                <string>%RECIPE_CACHE_DIR%/%NAME%/%NAME%*.dmg</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
             <string>AppDmgVersioner</string>
-            <key>Comment</key>
-            <string>The parent download recipe already unzips the .dmg.zip provided by the vendor, so we just reuse that instead of unarchiving again.</string>
             <key>Arguments</key>
             <dict>
                 <key>dmg_path</key>
-                <string>%RECIPE_CACHE_DIR%/%NAME%/%NAME%.dmg</string>
+                <string>%found_filename%</string>
             </dict>
         </dict>
         <dict>
@@ -34,7 +43,7 @@
             <key>Arguments</key>
             <dict>
                 <key>app_path</key>
-                <string>%RECIPE_CACHE_DIR%/%NAME%/%NAME%.dmg/Hudl Sportscode.app</string>
+                <string>%found_filename%/%APP_NAME%.app</string>
                 <key>pkg_path</key>
                 <string>%RECIPE_CACHE_DIR%/%NAME%-%version%.pkg</string>
             </dict>
