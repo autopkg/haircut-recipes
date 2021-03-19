@@ -19,42 +19,11 @@
     <array>
         <dict>
             <key>Processor</key>
-            <string>FileFinder</string>
+            <string>DeprecationWarning</string>
             <key>Arguments</key>
             <dict>
-                <key>pattern</key>
-                <string>%RECIPE_CACHE_DIR%/%NAME%/%NAME%*.dmg</string>
-            </dict>
-        </dict>
-        <dict>
-            <key>Processor</key>
-            <string>AppDmgVersioner</string>
-            <key>Comment</key>
-            <string>The parent download recipe already unzips the .dmg.zip provided by the vendor, so we just reuse that instead of unarchiving again.</string>
-            <key>Arguments</key>
-            <dict>
-                <key>dmg_path</key>
-                <string>%found_filename%</string>
-            </dict>
-        </dict>
-        <dict>
-            <key>Processor</key>
-            <string>AppPkgCreator</string>
-            <key>Arguments</key>
-            <dict>
-                <key>app_path</key>
-                <string>%found_filename%/%NAME%.app</string>
-            </dict>
-        </dict>
-        <dict>
-            <key>Processor</key>
-            <string>PathDeleter</string>
-            <key>Arguments</key>
-            <dict>
-                <key>path_list</key>
-                <array>
-                    <string>%RECIPE_CACHE_DIR%/%NAME%</string>
-                </array>
+                <key>warning_message</key>
+                <string>This set of recipes has been moved to primalcurve-recipes. Please update your recipe list and overrides accordingly.</string>
             </dict>
         </dict>
     </array>
