@@ -17,11 +17,24 @@
     <array>
         <dict>
             <key>Processor</key>
+            <string>URLTextSearcher</string>
+            <key>Arguments</key>
+            <dict>
+                <key>re_pattern</key>
+                <string>\"location\":\"(https://s3\.amazonaws\.com/FormlabsReleases/Release/.*/PreForm_mac_.*_release_releaser_42_6945\.dmg)\"},\"__APOLLO_STATE__</string>
+                <key>result_output_var_name</key>
+                <string>match</string>
+                <key>url</key>
+                <string>https://formlabs.com/download-preform-mac/</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
             <string>URLDownloader</string>
             <key>Arguments</key>
             <dict>
                 <key>url</key>
-                <string>https://formlabs.com/download-preform-mac/</string>
+                <string>%match%</string>
                 <key>filename</key>
                 <string>%NAME%.dmg</string>
             </dict>
