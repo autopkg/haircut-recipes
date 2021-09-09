@@ -10,10 +10,6 @@
     <dict>
         <key>NAME</key>
         <string>ReadWrite</string>
-        <key>url</key>
-        <string>http://fastdownloads2.texthelp.com/readwritemac7/installers/read&amp;write.dmg</string>
-        <key>USER_AGENT</key>
-        <string>Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/536.28.10 (KHTML, like Gecko) Version/6.0.3 Safari/536.28.10</string>
     </dict>
     <key>MinimumVersion</key>
     <string>1.0.0</string>
@@ -21,27 +17,44 @@
     <array>
         <dict>
             <key>Processor</key>
-            <string>URLDownloader</string>
+            <string>SparkleUpdateInfoProvider</string>
             <key>Arguments</key>
             <dict>
-                <key>filename</key>
-                <string>%NAME%.dmg</string>
+                <key>appcast_url</key>
+                <string>https://readwrite.texthelp.com/rw7mac/updatesp/appcast.xml</string>
             </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>URLDownloader</string>
         </dict>
         <dict>
             <key>Processor</key>
             <string>EndOfCheckPhase</string>
         </dict>
         <dict>
+            <key>Processor</key>
+            <string>Unarchiver</string>
+            <key>Arguments</key>
+            <dict>
+                <key>archive_path</key>
+                <string>%pathname%</string>
+                <key>destination_path</key>
+                <string>%RECIPE_CACHE_DIR%/Applications/</string>
+                <key>purge_destination</key>
+                <true/>
+            </dict>
+        </dict>
+        <dict>
+            <key>Processor</key>
+            <string>CodeSignatureVerifier</string>
             <key>Arguments</key>
             <dict>
                 <key>input_path</key>
-                <string>%RECIPE_CACHE_DIR%/downloads/%NAME%.dmg/Read&amp;Write.app</string>
+                <string>%RECIPE_CACHE_DIR%/Applications/Read&amp;Write.app</string>
                 <key>requirement</key>
                 <string>anchor apple generic and identifier "com.texthelp.Read-Write" and (certificate leaf[field.1.2.840.113635.100.6.1.9] /* exists */ or certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = S98PLZJ32T)</string>
             </dict>
-            <key>Processor</key>
-            <string>CodeSignatureVerifier</string>
         </dict>
     </array>
 </dict>
