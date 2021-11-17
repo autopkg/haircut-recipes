@@ -100,39 +100,6 @@ class DatadogEventPoster(URLGetter):
         result = json.loads(response)
         return result
 
-    # def post_event(self, event):
-    #     """Posts an Event to Datadog."""
-    #     endpoint = self.env.get(
-    #         "DD_ENDPOINT", "https://api.datadoghq.com/api/v1/events"
-    #     )
-    #     headers = {
-    #         "Content-Type": "application/json",
-    #         "DD-API-KEY": self.env.get("DD_API_KEY"),
-    #     }
-    #     response = requests.post(url=endpoint, headers=headers, json=event)
-    #     if 200 <= response.status_code <= 202:
-    #         return response.json()
-    #     else:
-    #         raise ProcessorError(
-    #             f"Unable to post Event. Response code: {response.status_code}. "
-    #             "Full response: {response.text}"
-    #         )
-
-    # request = urllib.request.Request(
-    #     url=endpoint, headers=headers, data=event, method="POST"
-    # )
-    # response = urllib.request.urlopen(request)
-    # status_code = response.getcode()
-
-    # if 200 <= status_code <= 202:
-    #     payload = json.loads(response.read().decode("utf-8"))
-    #     return payload
-    # else:
-    #     raise ProcessorError(
-    #         f"Unable to post Event. Response code: {response.status_code}. "
-    #         "Full response: {response.text}"
-    #     )
-
     def main(self):
         """Main"""
         # If the download has not changed, don't send an Event unless the recipe
