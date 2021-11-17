@@ -1,14 +1,14 @@
-#!/usr/bin/python
+#!/usr/local/autopkg/python
 
-from autopkglib import Processor, ProcessorError
+from autopkglib import Processor, ProcessorError, URLGetter
 
-import requests
+import json
 import time
 
 __all__ = ["DatadogEventPoster"]
 
 
-class DatadogEventPoster(Processor):
+class DatadogEventPoster(URLGetter):
     description = "Sends an Event to Datadog when a new package is available."
     input_variables = {
         "DD_API_KEY": {
@@ -43,6 +43,13 @@ class DatadogEventPoster(Processor):
                 "none."
             ),
         },
+        "DD_ENDPOINT": {
+            "required": False,
+            "description": (
+                "The API endpoint to which the event is posted. Defaults to "
+                "https://api.datadoghq.com/api/v1/events."
+            ),
+        },
         "NAME": {
             "required": True,
             "description": "Name of the product.",
@@ -67,25 +74,70 @@ class DatadogEventPoster(Processor):
 
     def post_event(self, event):
         """Posts an Event to Datadog."""
-        endpoint = "https://api.datadoghq.com/api/v1/events"
+        endpoint = self.env.get(
+            "DD_ENDPOINT", "https://api.datadoghq.com/api/v1/events"
+        )
+        # Required headers
         headers = {
             "Content-Type": "application/json",
             "DD-API-KEY": self.env.get("DD_API_KEY"),
         }
-        response = requests.post(url=endpoint, json=event, headers=headers)
-        if 200 <= response.status_code <= 202:
-            return response.json()
-        else:
-            raise ProcessorError(
-                f"Unable to post Event. Response code: {response.status_code}. "
-                "Full response: {response.text}"
-            )
+        # curl options
+        curl_opts = [
+            "--url",
+            endpoint,
+            "--request",
+            "POST",
+            "--data",
+            json.dumps(event),
+        ]
+        # Assemble the curl command
+        curl_cmd = self.prepare_curl_cmd()
+        self.add_curl_headers(curl_cmd, headers)
+        curl_cmd.extend(curl_opts)
+        # Post the Event
+        response = self.download_with_curl(curl_cmd)
+        result = json.loads(response)
+        return result
+
+    # def post_event(self, event):
+    #     """Posts an Event to Datadog."""
+    #     endpoint = self.env.get(
+    #         "DD_ENDPOINT", "https://api.datadoghq.com/api/v1/events"
+    #     )
+    #     headers = {
+    #         "Content-Type": "application/json",
+    #         "DD-API-KEY": self.env.get("DD_API_KEY"),
+    #     }
+    #     response = requests.post(url=endpoint, headers=headers, json=event)
+    #     if 200 <= response.status_code <= 202:
+    #         return response.json()
+    #     else:
+    #         raise ProcessorError(
+    #             f"Unable to post Event. Response code: {response.status_code}. "
+    #             "Full response: {response.text}"
+    #         )
+
+    # request = urllib.request.Request(
+    #     url=endpoint, headers=headers, data=event, method="POST"
+    # )
+    # response = urllib.request.urlopen(request)
+    # status_code = response.getcode()
+
+    # if 200 <= status_code <= 202:
+    #     payload = json.loads(response.read().decode("utf-8"))
+    #     return payload
+    # else:
+    #     raise ProcessorError(
+    #         f"Unable to post Event. Response code: {response.status_code}. "
+    #         "Full response: {response.text}"
+    #     )
 
     def main(self):
         """Main"""
-        ignore_unchanged = self.env.get("IGNORE_UNCHANGED_DOWNLOAD", False)
         # If the download has not changed, don't send an Event unless the recipe
         # specifies to ignore unchanged downloads.
+        ignore_unchanged = self.env.get("IGNORE_UNCHANGED_DOWNLOAD", False)
         if not self.env.get("download_changed") and not ignore_unchanged:
             exit()
         # If the recipe provided DD_TAGS, and provided a single string instead
@@ -109,9 +161,13 @@ class DatadogEventPoster(Processor):
                 "downloaded and packaged."
             ),
         }
-        response = self.post_event(event)
-        self.env["datadog_event_id"] = response["event"]["id"]
-        self.env["datadog_event_url"] = response["event"]["url"]
+        try:
+            response = self.post_event(event)
+            self.env["datadog_event_id"] = response["event"]["id"]
+            self.env["datadog_event_url"] = response["event"]["url"]
+            self.output(f"Posted Datadog Event {response['event']['url']}")
+        except Exception as e:
+            self.output(f"DatadogEventPoster error: {e}")
 
 
 if __name__ == "__main__":
