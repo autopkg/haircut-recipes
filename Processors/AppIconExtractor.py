@@ -57,14 +57,18 @@ DEFAULT_ICON_UNINSTALL = "iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAFX2lUWH
 
 
 class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
-    description = "Extracts an app icon and saves it to disk. Optionally creates composite images."
+    description = (
+        "Extracts an app icon and saves it to disk. Optionally creates "
+        "composite images."
+    )
     input_variables = {
         "source": {
             "required": True,
-            "description": "Path to a .app, DMG, or flat package from which to extract an icon.",
+            "description": "Path to a .app, DMG, or flat package from which to "
+            "extract an icon.",
         },
-        "icon_path": {
-            "required": True,
+        "icon_output_path": {
+            "required": False,
             "description": "The output path to write the .png icon. If not "
             "set, defaults to %RECIPE_CACHE_DIR%/%NAME%.png",
         },
@@ -120,7 +124,23 @@ class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
             "a template icon on top. Defaults to `10`.",
         },
     }
-    output_variables = {}
+    output_variables = {
+        "app_icon_path": {
+            "description": "The path on disk to the plain, uncomposited app icon."
+        },
+        "install_icon_path": {
+            "description": "The path on disk to the 'install' composited icon "
+            "variation, if requested."
+        },
+        "update_icon_path": {
+            "description": "The path on disk to the 'update' composited icon "
+            "variation, if requested."
+        },
+        "uninstall_icon_path": {
+            "description": "The path on disk to the 'uninstall' composited icon "
+            "variation, if requested."
+        },
+    }
     description = __doc__
 
     # Initialize for FlatPkgUnpacker
@@ -147,14 +167,14 @@ class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
             return False
 
     def find_app_in_payload(self, payload_path: str) -> tuple:
-        """Finds .app paths inside a package payload by globbing and returns 
+        """Finds .app paths inside a package payload by globbing and returns
         those paths.
-        
+
         Arguments:
             payload_path: string path to the unpacked package payload on disk
 
         Returns:
-            tuple of a list of matches and the path    
+            tuple of a list of matches and the path
         """
         self.env["destination_path"] = os.path.join(
             self.env["RECIPE_CACHE_DIR"], "AppIconExtractorUnpackedPayload"
@@ -176,10 +196,10 @@ class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
     def unpack_pkg(self, pkg_path: str) -> str:
         """Unpacks a flat package and returns the string path to the unpacked
         file directory on disk.
-        
+
         Arguments:
             pkg_path: string path to the flat pkg
-            
+
         Returns:
             string path to unpacked file directory
         """
@@ -352,11 +372,13 @@ class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
         bg.close()
         fg.close()
 
+        return output_path
+
     def main(self):
         """Main"""
         # Retrieve or set a default output path for the app icon
-        if self.env.get("icon_path"):
-            app_icon_output_path = self.env.get("icon_path")
+        if self.env.get("icon_output_path"):
+            app_icon_output_path = self.env.get("icon_output_path")
         else:
             recipe_dir = self.env["RECIPE_CACHE_DIR"]
             icon_name = self.env["NAME"]
@@ -385,6 +407,7 @@ class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
                 f"Unable to determine app icon path for app at {app_path}."
             )
         icon_path = self.save_icon_to_destination(app_icon_path, app_icon_output_path)
+        self.env["app_icon_path"] = icon_path
 
         # Create an 'install' version if requested
         if self.env.get("composite_install_path"):
@@ -395,6 +418,7 @@ class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
             install_icon = self.composite_icon(
                 app_icon_path, install_template, install_path
             )
+            self.env["install_icon_path"] = install_icon
 
         # Create an 'uninstall' version if requested
         if self.env.get("composite_uninstall_path"):
@@ -405,6 +429,7 @@ class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
             uninstall_icon = self.composite_icon(
                 app_icon_path, uninstall_template, uninstall_path
             )
+            self.env["uninstall_icon_path"] = uninstall_icon
 
         # Create an 'update' version if requested
         if self.env.get("composite_update_path"):
@@ -415,6 +440,7 @@ class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
             update_icon = self.composite_icon(
                 app_icon_path, update_template, update_path
             )
+            self.env["update_icon_path"] = update_icon
 
         # If we mounted a dmg, unmount it
         if dmg:
