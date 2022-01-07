@@ -31,12 +31,9 @@ import plistlib
 import base64
 import io
 import os
-import shutil
-from glob import glob
 
 from autopkglib import Processor, ProcessorError
-from autopkglib.FlatPkgUnpacker import FlatPkgUnpacker
-from autopkglib.PkgPayloadUnpacker import PkgPayloadUnpacker
+from autopkglib.DmgMounter import DmgMounter
 
 try:
     from PIL import Image
@@ -56,7 +53,7 @@ DEFAULT_ICON_INSTALL = "iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAFXWlUWHRY
 DEFAULT_ICON_UNINSTALL = "iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAFX2lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIKICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgZXhpZjpQaXhlbFhEaW1lbnNpb249IjEwMCIKICAgZXhpZjpQaXhlbFlEaW1lbnNpb249IjEwMCIKICAgZXhpZjpDb2xvclNwYWNlPSIxIgogICB0aWZmOkltYWdlV2lkdGg9IjEwMCIKICAgdGlmZjpJbWFnZUxlbmd0aD0iMTAwIgogICB0aWZmOlJlc29sdXRpb25Vbml0PSIyIgogICB0aWZmOlhSZXNvbHV0aW9uPSI3Mi8xIgogICB0aWZmOllSZXNvbHV0aW9uPSI3Mi8xIgogICBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIgogICBwaG90b3Nob3A6SUNDUHJv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"
 
 
-class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
+class AppIconExtractor(DmgMounter):
     description = (
         "Extracts an app icon and saves it to disk. Optionally creates "
         "composite images."
@@ -64,8 +61,10 @@ class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
     input_variables = {
         "source": {
             "required": True,
-            "description": "Path to a .app, DMG, or flat package from which to "
-            "extract an icon.",
+            "description": "Path to the .app from which to extract an icon. "
+            "Can point to a path inside a .dmg which will be mounted. This "
+            "path may also contain basic globbing characters such as the "
+            "wildcard '*', but only the first result will be returned.",
         },
         "icon_output_path": {
             "required": False,
@@ -143,11 +142,6 @@ class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
     }
     description = __doc__
 
-    # Initialize for FlatPkgUnpacker
-    source_path = None
-    # Initialize for package unpacking cleanup
-    pkg_cleanup = []
-
     def is_base64(self, s: str) -> bool:
         """Returns boolean whether the passed string is a base64-endcoded value.
 
@@ -166,76 +160,6 @@ class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
         except Exception:
             return False
 
-    def find_app_in_payload(self, payload_path: str) -> tuple:
-        """Finds .app paths inside a package payload by globbing and returns
-        those paths.
-
-        Arguments:
-            payload_path: string path to the unpacked package payload on disk
-
-        Returns:
-            tuple of a list of matches and the path
-        """
-        self.env["destination_path"] = os.path.join(
-            self.env["RECIPE_CACHE_DIR"], "AppIconExtractorUnpackedPayload"
-        )
-        self.pkg_cleanup.append(self.env["destination_path"])
-        self.unpack_pkg_payload()
-        # Find *.app in the unpacked 'Applications' folder first
-        app_glob_path = os.path.join(
-            self.env["destination_path"], "Applications", "*.app"
-        )
-        matches = glob(app_glob_path)
-        if len(matches) > 0:
-            return matches, app_glob_path
-        else:
-            # Try to find *.app in the parent dir – fix for Virtualbox
-            app_glob_path = os.path.join(self.env["destination_path"], "*.app")
-            return glob(app_glob_path), app_glob_path
-
-    def unpack_pkg(self, pkg_path: str) -> str:
-        """Unpacks a flat package and returns the string path to the unpacked
-        file directory on disk.
-
-        Arguments:
-            pkg_path: string path to the flat pkg
-
-        Returns:
-            string path to unpacked file directory
-        """
-        # Unpack the package to a temporary directory witihn the recipe cache like FlatPkgUnpacker
-        self.env["destination_path"] = os.path.join(
-            self.env["RECIPE_CACHE_DIR"], "AppIconExtractorUnpackedPkg"
-        )
-        self.pkg_cleanup.append(self.env["destination_path"])
-        self.source_path = pkg_path
-        self.unpack_flat_pkg()
-        # Unpack the payload like PkgPayloadUnpacker
-        self.env["pkg_payload_path"] = os.path.join(
-            self.env["destination_path"], "Payload"
-        )
-        # Unpack the payload if it exists
-        if os.path.isfile(self.env["pkg_payload_path"]):
-            matches, app_glob_path = self.find_app_in_payload(
-                self.env["pkg_payload_path"]
-            )
-        else:
-            pkgs = os.path.join(self.env["destination_path"], "*.pkg", "Payload")
-            payload_matches = glob(pkgs)
-            if len(payload_matches) == 0:
-                raise ProcessorError(f"No subpackages found by globbing {pkgs}.")
-            else:
-                # Iterate through subpackages until a .app match is found
-                for path in payload_matches:
-                    matches, app_glob_path = self.find_app_in_payload(path)
-                    if len(matches) > 0:
-                        break
-        if len(matches) == 0:
-            raise ProcessorError(f"No match found by globbing {app_glob_path}")
-        elif len(matches) > 1:
-            raise ProcessorError(f"Multiple matches found by globbing {app_glob_path}")
-        else:
-            return matches[0]
 
     def get_app_icon_path(self, app_path: str) -> str:
         """Returns the full path to the app icon specified in an app's
@@ -387,15 +311,12 @@ class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
         # Retrieve the app path
         source = self.env.get("source")
 
-        # Determine if the app path is within a dmg, pkg, or neither
+        # Determine if the app path is within a dmg
         (dmg_path, dmg, dmg_app_path) = self.parsePathForDMG(source)
         if dmg:
             # Mount dmg and return app path inside
             mount_point = self.mount(dmg_path)
             app_path = os.path.join(mount_point, dmg_app_path)
-        elif os.path.splitext(source)[1] == ".pkg":
-            # Unpack the package to a temporary directory within the recipe cache
-            app_path = self.unpack_pkg(source)
         else:
             # Use the source path as-is, assuming it's a full path to a .app
             app_path = source
@@ -445,12 +366,6 @@ class AppIconExtractor(PkgPayloadUnpacker, FlatPkgUnpacker):
         # If we mounted a dmg, unmount it
         if dmg:
             self.unmount(dmg_path)
-
-        # If we unpacked a package, delete the temp dir
-        if len(self.pkg_cleanup) > 0:
-            for directory in self.pkg_cleanup:
-                if os.path.isdir(directory):
-                    shutil.rmtree(directory)
 
 
 if __name__ == "__main__":
