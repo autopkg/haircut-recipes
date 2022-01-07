@@ -7,7 +7,7 @@
 Extracts the icon from an app and saves it to disk. Optionally creates composite
 icons by superimposing template images on top of the app icon to provide visual
 "install", "update", and "uninstall" indicators. The .app can be specified as a
-full path, and can be inside a DMG or a PKG.
+full path, and can be inside a DMG.
 
 Extracted icons are output in PNG format, and default to 256x256 pixels in size.
 
