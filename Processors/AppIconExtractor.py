@@ -59,7 +59,7 @@ class AppIconExtractor(DmgMounter):
         "composite images."
     )
     input_variables = {
-        "source": {
+        "source_app": {
             "required": True,
             "description": "Path to the .app from which to extract an icon. "
             "Can point to a path inside a .dmg which will be mounted. This "
@@ -309,17 +309,17 @@ class AppIconExtractor(DmgMounter):
             app_icon_output_path = os.path.join(recipe_dir, icon_name + ".png")
 
         # Retrieve the app path
-        source = self.env.get("source")
+        source_app = self.env.get("source_app")
 
         # Determine if the app path is within a dmg
-        (dmg_path, dmg, dmg_app_path) = self.parsePathForDMG(source)
+        (dmg_path, dmg, dmg_app_path) = self.parsePathForDMG(source_app)
         if dmg:
             # Mount dmg and return app path inside
             mount_point = self.mount(dmg_path)
             app_path = os.path.join(mount_point, dmg_app_path)
         else:
             # Use the source path as-is, assuming it's a full path to a .app
-            app_path = source
+            app_path = source_app
 
         # Extract the app icon to the destination path
         app_icon_path = self.get_app_icon_path(app_path)
