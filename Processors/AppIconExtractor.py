@@ -202,7 +202,13 @@ class AppIconExtractor(DmgMounter):
         """
         try:
             icon = Image.open(input_path)
-            icon.size = (128, 128, 2)
+            if (128, 128, 2) in icon.info["sizes"]:
+                icon.size = (128, 128, 2)
+            elif (256, 256) in icon.info["sizes"]:
+                icon.size = (256, 256)
+            else:
+                self.output("Resizing icon to 256px.")
+                icon = icon.resize((256, 256))
             icon.convert("RGBA")
             icon.load()
             icon.save(output_path, format="png")
@@ -261,7 +267,13 @@ class AppIconExtractor(DmgMounter):
         #   3. It might be confusing and complicate error handling if a recipe
         #      passed a larger representation that may not be available.
         #   4. PRs accepted for improvements :)
-        bg.size = (128, 128, 2)
+        if (128, 128, 2) in bg.info["sizes"]:
+            bg.size = (128, 128, 2)
+        elif (256, 256) in bg.info["sizes"]:
+            bg.size = (256, 256)
+        else:
+            self.output("Resizing icon to 256px.")
+            bg = bg.resize((256, 256))
         bg.convert("RGBA")
         bg.load()
         # Open the foreground template
