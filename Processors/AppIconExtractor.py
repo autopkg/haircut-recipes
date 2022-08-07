@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Extended to extract icons from Windows PE-files. 20220807, Hm
 """
 AppIconExtractor
 
@@ -22,6 +23,8 @@ Important! You *must* install the Pillow library to AutoPkg's Python framework.
 You can do this by running:
 
 /usr/local/autopkg/python -m pip install --upgrade Pillow
+And on Windows:
+pip install icoextract
 """
 
 import plistlib
@@ -29,11 +32,15 @@ import base64
 import io
 import os
 
+
 from autopkglib import Processor, ProcessorError
 from autopkglib.DmgMounter import DmgMounter
+from autopkglib import is_mac, is_windows
 
 try:
     from PIL import Image
+    if is_windows():
+        import icoextract
 except (ImportError, ModuleNotFoundError):
     raise ProcessorError(
         "The Pillow library is required, but was not found. "
@@ -62,6 +69,11 @@ class AppIconExtractor(DmgMounter):
             "Can point to a path inside a .dmg which will be mounted. This "
             "path may also contain basic globbing characters such as the "
             "wildcard '*', but only the first result will be returned.",
+        },
+        "icon_file_number": {
+            "required": False,
+            "default": 0,
+            "description": "Numbered index of the icon to get.",
         },
         "icon_output_path": {
             "required": False,
@@ -157,7 +169,7 @@ class AppIconExtractor(DmgMounter):
         except Exception:
             return False
 
-    def get_app_icon_path(self, app_path: str) -> str:
+    def get_app_icon_path(self, app_path: str, icon_number: int) -> str:
         """Returns the full path to the app icon specified in an app's
         Info.plist file if possible.
 
@@ -166,22 +178,42 @@ class AppIconExtractor(DmgMounter):
 
         Returns:
             string path to the app icon, or None if unable to find it
+        
+        Windows:
+            Extracts the icon-group from a PE-file to ICO-file.
+            Returns the path to the extracted ICO-file.
+            An ICO-file can be red by the following (PIL-) functions.
+            Todo: Extend it to extract from MSI files.
         """
         if not os.path.exists(app_path):
             return None
-        try:
-            info = plistlib.readPlist(os.path.join(app_path, "Contents/Info.plist"))
-        except plistlib.PlistReadError:
-            return None
-        # Read the CFBundleIconFile property, or try using the app's name if
-        # that property doesn't exist. This won't catch every case of poor app
-        # construction but it will catch some.
-        app_name = os.path.basename(app_path)
-        icon_filename = info.get("CFBundleIconFile", app_name)
-        icon_path = os.path.join(app_path, "Contents/Resources", icon_filename)
-        # Add .icns if missing
-        if not os.path.splitext(icon_path)[1]:
-            icon_path += ".icns"
+
+        if is_mac():
+            try:
+                info = plistlib.readPlist(os.path.join(app_path, "Contents/Info.plist"))
+            except plistlib.PlistReadError:
+                return None
+            # Read the CFBundleIconFile property, or try using the app's name if
+            # that property doesn't exist. This won't catch every case of poor app
+            # construction but it will catch some.
+            app_name = os.path.basename(app_path)
+            icon_filename = info.get("CFBundleIconFile", app_name)
+            icon_path = os.path.join(app_path, "Contents/Resources", icon_filename)
+            # Add .icns if missing
+            if not os.path.splitext(icon_path)[1]:
+                icon_path += ".icns"
+            # if os.path.exists(icon_path):
+                # return icon_path
+
+        if is_windows():
+            file_name, file_ext = os.path.splitext(app_path)
+            icon_path = file_name + ".ico"
+            try:
+                icoExtInst = icoextract.IconExtractor(app_path)
+            except RuntimeError:
+                f"Unable to open {app_path} icon extraction."
+            icoExtInst.export_icon(icon_path, num=icon_number)
+
         if os.path.exists(icon_path):
             return icon_path
         return None
@@ -323,8 +355,11 @@ class AppIconExtractor(DmgMounter):
     def main(self):
         """Main"""
         # Retrieve or set a default output path for the app icon
+        # Create it, if it does not exist
         if self.env.get("icon_output_path"):
             app_icon_output_path = self.env.get("icon_output_path")
+            if not os.path.isdir(os.path.dirname(app_icon_output_path)):
+                os.makedirs(os.path.dirname(app_icon_output_path))
         else:
             recipe_dir = self.env["RECIPE_CACHE_DIR"]
             icon_name = self.env["NAME"]
@@ -332,6 +367,7 @@ class AppIconExtractor(DmgMounter):
 
         # Retrieve the app path
         source_app = self.env.get("source_app")
+        icon_file_number = int(self.env.get("icon_file_number", 0))
 
         # Determine if the app path is within a dmg
         (dmg_path, dmg, dmg_app_path) = self.parsePathForDMG(source_app)
@@ -344,7 +380,7 @@ class AppIconExtractor(DmgMounter):
             app_path = source_app
 
         # Extract the app icon to the destination path
-        app_icon_path = self.get_app_icon_path(app_path)
+        app_icon_path = self.get_app_icon_path(app_path, icon_file_number)
         if not app_icon_path:
             raise ProcessorError(
                 f"Unable to determine app icon path for app at {app_path}."
