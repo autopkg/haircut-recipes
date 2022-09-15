@@ -56,6 +56,12 @@ class AppIconExtractor(DmgMounter):
         "composite images."
     )
     input_variables = {
+        "icon_engine": {
+            "default": "builtin"
+            "required": False,
+            "description": "String specifying an icon engine by name or path. "
+            "Default is \"builtin.\"",
+        },
         "source_app": {
             "required": True,
             "description": "Path to the .app from which to extract an icon. "
