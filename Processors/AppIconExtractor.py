@@ -57,10 +57,10 @@ class AppIconExtractor(DmgMounter):
     )
     input_variables = {
         "icon_engine": {
-            "default": "builtin"
+            "default": "builtin",
             "required": False,
             "description": "String specifying an icon engine by name or path. "
-            "Default is \"builtin.\"",
+            'Default is "builtin."',
         },
         "source_app": {
             "required": True,
