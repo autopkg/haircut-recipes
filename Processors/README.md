@@ -1,36 +1,188 @@
 # Processors
 
+## Using these processors
+
+Add this repo to AutoPkg (by running `autopkg repo-add haircut-recipes`), then
+call a Processor using [Shared Processor][sharedprocessor] syntax, e.g.
+`com.github.haircut.processors/AppIconExtractor`.
+
 ## AppIconExtractor
 
-### Description
+Please see my [article demonstrating AppIconExtractor][mbaie] for full
+details and examples.
 
-Extracts the icon from an app and saves it to disk. Optionally creates composite
-icons by superimposing template images on top of the app icon to provide visual
-"install", "update", and "uninstall" indicators. The .app can be specified as a
-full path, and can be inside a DMG.
+## DatetimeOutputter
 
-Extracted icons are output in PNG format, and default to 256x256 pixels in size.
+Outputs the current datetime, optionally in a format of your choice. Optionally output future or past datetimes.
 
-### Input Variables
+Please see my [article demonstrating DatetimeOutputter][mbdo] for full
+details and additional examples.
 
-- **source:**
-    - **required:** True
-    - **description:** Path to a .app, or a .dmg or .pkg containing a .app. The app's icon filename is read from the `CFBundleIconFile` key of the app's `Info.plist`.
-- **icon_output_path:**
-    - **required:** False
-    - **default:**
-        - `%RECIPE_CACHE_DIR%/%NAME.png`
-    - **description:** The output path the app icon should be written to.
+### Input variables
 
-### Output Variables
-- **plist\_reader\_output\_variables:**
-    - **description:** Output variables per 'plist\_keys' supplied as input. Note that this output variable is used as both a placeholder for documentation and for auditing purposes. One should use the actual named output variables as given as values to 'plist\_keys' to refer to the output of this processor.
+- **datetime\_format:**
+  - **required:** False
+  - **description:** An optional Python strftime-compatible datetime format.  
+    See <https://strftime.org/> for examples. Defaults to ISO 8601 format.
+- **use\_utc:**
+  - **required:** False
+  - **description:** If set to true, datetimes are based on UTC rather than
+    local time.
+- **deltas:**
+  - **required**: False
+  - **description:** An optional array of time deltas – past or future datetimes
+    – to output. Each time delta should be specified as a dictionary of keys
+    defining the desired output datetime. Those keys are: `output_name` which
+    defines the output variable name for the time delta, `direction` which is
+    either `future` or `past`, and `interval` which is a dictionary of keys
+    specifying Python timedelta-compatible intervals to add or subtract from the
+    current datetime. Valid keys are: `days`, `seconds`, `microseconds`,
+    `milliseconds`, `minutes`, `hours`, and `weeks`. Optionally, you may also
+    include a `format` which is a Python strftime-compatible datetime format.
+    See the Python docs at
+    <https://docs.python.org/3/library/datetime.html#timedelta-objects> for
+    specifics on `timedelta` and the README for this Processor for examples.
 
-### Compositing
+### Output variables
 
-In addition to extracting an app's icon, `AppIconExtractor` can create composite
-icons by superimposing a template image on top of the app icon. This is useful
-to generate icon variations for use in "update", "uninstall" or "install" Self
-Service policies within an endpoint management system, to provide an additional
-visual indicator of the policy's purpose.
+- **datetime:**
+  - **description**: The current datetime.
+- **datetime_deltas:**
+  - **description:** Any requested datetime deltas. Note that the actual
+      name of output variables depends on the input variable `output_name`
+      defined within any `deltas` dictionaries.
 
+### Examples
+
+You can output the current datetime in ISO 8601 format by calling the processor
+with no arguments
+
+XML:
+
+```xml
+<key>Process</key>
+<array>
+    <dict>
+        <key>Processor</key>
+        <string>com.github.haircut.processors/DatetimeOutputter</string>
+    </dict>
+</array>
+```
+
+YAML:
+
+```yaml
+Process:
+  - Processor: com.github.haircut.processors/DatetimeOutputter
+```
+
+This will output a new `datetime` variable you can use in subsequent processors.
+
+You can optionally base the outputted datetime on UTC rather than local time,
+and specify a custom Python strftime-compatible format for the outputted
+datetime.
+
+XML:
+
+```xml
+<key>Process</key>
+<array>
+    <dict>
+        <key>Processor</key>
+        <string>com.github.haircut.processors/DatetimeOutputter</string>
+        <key>Arguments</key>
+        <dict>
+            <key>use_utc</key>
+            <true/>
+            <key>datetime_format</key>
+            <string>%A, %B %e, %Y</string>
+        </dict>
+    </dict>
+</array>
+```
+
+YAML:
+
+```yaml
+Process:
+  - Processor: com.github.haircut.processors/DatetimeOutputter
+    Arguments:
+      use_utc: True
+      datetime_format: "%A, %B %e, %Y"
+```
+
+Finally, this example demonstrates outputting two time deltas; 4 hours and 30 minutes in the past, and 1 week in the future, both in different formats.
+
+XML:
+
+```xml
+<key>Process</key>
+<array>
+    <dict>
+        <key>Processor</key>
+        <string>com.github.haircut.processors/DatetimeOutputter</string>
+        <key>Arguments</key>
+        <dict>
+            <key>deltas</key>
+            <array>
+                <dict>
+                    <key>direction</key>
+                    <string>past</string>
+                    <key>interval</key>
+                    <dict>
+                        <key>hours</key>
+                        <integer>4</integer>
+                        <key>minutes</key>
+                        <integer>30</integer>
+                    </dict>
+                    <key>output_name</key>
+                    <string>past_time</string>
+                </dict>
+                <dict>
+                    <key>datetime_format</key>
+                    <string>%Y-%m-%dT%H:%M:%S</string>
+                    <key>direction</key>
+                    <string>future</string>
+                    <key>interval</key>
+                    <dict>
+                        <key>weeks</key>
+                        <integer>1</integer>
+                    </dict>
+                    <key>output_name</key>
+                    <string>force_after_date</string>
+                </dict>
+            </array>
+        </dict>
+    </dict>
+</array>
+```
+
+YAML:
+
+```yaml
+Process:
+  - Processor: com.github.haircut.processors/DatetimeOutputter
+    Arguments:
+      deltas:
+        - output_name: past_time
+          direction: past
+          interval:
+            hours: 4
+            minutes: 30
+        - output_name: force_after_date
+          direction: future
+          interval:
+            weeks: 1
+          datetime_format: "%Y-%m-%dT%H:%M:%S"
+```
+
+This example would output the following variables:
+
+- `datetime`: the current local datetime in the default ISO 8601 format.
+- `past_time`: 4 hours and 30 minutes ago, in local time, in the default ISO 
+  8601 format.
+- `force_after_date`: 1 week from now, in local time, in a custom format.
+
+[sharedprocessor]: <https://github.com/autopkg/autopkg/wiki/Processor-Locations#shared-recipe-processors>
+[mbaie]: <https://www.macblog.org/posts/appiconextractor/>
+[mbdo]: <https://www.macblog.org/posts/output-datetime-autopkg/>
