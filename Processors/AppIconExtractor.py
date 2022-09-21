@@ -170,8 +170,9 @@ class AppIconExtractor(DmgMounter):
         if not os.path.exists(app_path):
             return None
         try:
-            info = plistlib.readPlist(os.path.join(app_path, "Contents/Info.plist"))
-        except plistlib.PlistReadError:
+            with open(os.path.join(app_path, "Contents/Info.plist"), "rb") as app_plist:
+                info = plistlib.load(app_plist)
+        except plistlib.InvalidFileException:
             return None
         # Read the CFBundleIconFile property, or try using the app's name if
         # that property doesn't exist. This won't catch every case of poor app
