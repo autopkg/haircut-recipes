@@ -179,9 +179,71 @@ Process:
 This example would output the following variables:
 
 - `datetime`: the current local datetime in the default ISO 8601 format.
-- `past_time`: 4 hours and 30 minutes ago, in local time, in the default ISO 
+- `past_time`: 4 hours and 30 minutes ago, in local time, in the default ISO
   8601 format.
 - `force_after_date`: 1 week from now, in local time, in a custom format.
+
+## StringInserter
+
+This processor is useful for affixing strings with a prefix or suffix, or for simply inserting one string into another.
+Most commonly, that destination string would be another output variable from some other AutoPkg processor.
+
+### Input variables
+
+- **input_string**:
+  - required: True
+  - description: The string to insert `insertion_string` into.
+- **insertion_string**:
+  - required: True
+  - description: The string to insert.
+- **index**:
+  - required: False
+  - description: The numerical index at which to insert the string, or 'suffix'.
+- **output_variable_name**:
+  - required: False
+  - description: The name of the output variable to set. Defaults to 'output_string'.
+
+### Output variables
+
+- **output_string**:
+  - description: The final string with the inserted string.
+                 Note that`output_string` is the default value, but can be overridden by providing `output_variable_name`.
+
+### Examples
+
+The following example will add the text `Build ` at index 1 in a `version_regex` variable, overwriting the existing value of that variable.
+
+```yaml
+- Processor: com.github.haircut.processors/StringInserter
+  Arguments:
+    input_string: "%version_regex%"
+    insertion_string: "Build "
+    index: 1
+    output_variable_name: "version_regex"
+```
+
+Results:
+
+Before: `^(\d{5,}.*)$`
+
+After: `^Build (\d{5,}.*)$`
+
+The following example will add a suffix of ` beta` to the existing `version` variable and output a new variable with the default name `output_string`.
+This uses the special "suffix" value for `index`.
+
+```yaml
+- Processor: com.github.haircut.processors/StringInserter
+  Arguments:
+    input_string: "%version%"
+    insertion_string: " beta"
+    index: "suffix"
+```
+
+Results:
+
+`version`: `4.3.1`
+
+`output_string`: `4.3.1 beta`
 
 [sharedprocessor]: <https://github.com/autopkg/autopkg/wiki/Processor-Locations#shared-recipe-processors>
 [mbaie]: <https://www.macblog.org/posts/appiconextractor/>
