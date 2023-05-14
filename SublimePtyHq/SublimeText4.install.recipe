@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Description</key>
-    <string>Installs the current release release of Sublime Text 4.</string>
+    <string>Installs the current release of Sublime Text 4.</string>
     <key>Identifier</key>
     <string>com.github.haircut.install.SublimeText4</string>
     <key>Input</key>
