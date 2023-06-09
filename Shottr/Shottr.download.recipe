@@ -11,9 +11,9 @@
         <key>NAME</key>
         <string>Shottr</string>
         <key>SEARCH_URL</key>
-        <string>https://www.shottr.cc/</string>
+        <string>https://www.shottr.cc/newversion.html</string>
         <key>SEARCH_PATTERN</key>
-        <string>(\/dl\/Shottr-.+\.dmg)</string>
+        <string>(dl\/Shottr-.+\.dmg)</string>
     </dict>
     <key>MinimumVersion</key>
     <string>1.0.0</string>
@@ -38,7 +38,7 @@
             <key>Arguments</key>
             <dict>
                 <key>url</key>
-                <string>%SEARCH_URL%%dmg_url%</string>
+                <string>https://shottr.cc/%dmg_url%</string>
                 <key>filename</key>
                 <string>%NAME%.dmg</string>
             </dict>
