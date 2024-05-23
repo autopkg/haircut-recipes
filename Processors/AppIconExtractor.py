@@ -32,6 +32,7 @@ import io
 import os
 import sys
 
+
 from autopkglib import Processor, ProcessorError
 from autopkglib.DmgMounter import DmgMounter
 from autopkglib import is_mac, is_windows
@@ -225,6 +226,7 @@ class AppIconExtractor(DmgMounter):
         self.output(filetype_def)
         full_file_path = ""
         return filetype_def
+
     def get_app_icon_path(self, app_path: str, icon_number: int) -> str:
         """Returns the full path to the app icon specified in an app's
         Info.plist file if possible.
@@ -271,11 +273,13 @@ class AppIconExtractor(DmgMounter):
                 f"Unable to open {app_path} icon extraction."
             icoExtInst.export_icon(icon_path, num=icon_number)
             self.output(icon_path)
+
         if os.path.exists(icon_path):
             return icon_path
         return None
 
     def save_icon_to_destination(self, input_path: str, output_path: str) -> str:
+    # def save_icon_to_destination(self, input_path: str, output_path: str, icon_number: int) -> str:
         """Copies the input icns file path to the output file path as a png.
 
         Arguments:
@@ -285,6 +289,7 @@ class AppIconExtractor(DmgMounter):
         Returns:
             full path to the output file, or None if the operation failed
         """
+
         try:
             icon = Image.open(input_path)
             # self.output(icon.info["sizes"])
@@ -319,7 +324,8 @@ class AppIconExtractor(DmgMounter):
                         self.output("Resizing 512 icon to 256px.")
                         icon = icon.resize((256, 256))
                     elif icon.size == (256, 256):
-                        icon.size = (256, 256)
+                        # icon.size = (256, 256)
+                        self.output("No resize, already 256px.")
                     else:
                         self.output("Resizing icon to 256px.")
                         icon = icon.resize((256, 256))
@@ -332,6 +338,7 @@ class AppIconExtractor(DmgMounter):
             icon.load()
             icon.save(output_path, format="png")
             return output_path
+
         except PermissionError:
             raise ProcessorError(
                 f"Unable to save app icon to {output_path} due to permissions."
@@ -444,13 +451,18 @@ class AppIconExtractor(DmgMounter):
                     self.output("Resizing 512 icon to 256px.")
                     bg = bg.resize((256, 256))
                 elif bg.size == (256, 256):
-                    bg.size = (256, 256)
+                    # bg.size = (256, 256)
+                    self.output("No resize, already 256px.")
                 else:
                     self.output("Resizing icon to 256px.")
                     bg = bg.resize((256, 256))
             else:
                 self.output("Unrecognizeable image format! Not ICO or PNG.")
         bg.convert("RGBA")
+        if not bg.mode == "RGBA":
+            img = Image.new("RGBA", (256,256), color=(0,0,0))
+            img.paste(bg, (0,0))
+            bg = img.copy()
         bg.load()
         # Open the foreground template
         fg = Image.open(foreground).convert("RGBA")
@@ -545,9 +557,9 @@ class AppIconExtractor(DmgMounter):
         if os.path.exists(icon_path):
             return icon_path
         return None
+
     def main(self):
         """Main"""
-
         # Retrieve the app path
         source_app = self.env.get("source_app")
 
@@ -611,6 +623,7 @@ class AppIconExtractor(DmgMounter):
             recipe_dir = self.env["RECIPE_CACHE_DIR"]
             icon_name = self.env["NAME"]
             app_icon_output_path = os.path.join(recipe_dir, icon_name + ".png")
+        
         icon_path = self.save_icon_to_destination(app_icon_path, app_icon_output_path)
         self.env["app_icon_path"] = icon_path
 
