@@ -2,6 +2,8 @@
 #
 # Copyright 2022 Matthew Warren
 #
+# Extended to work with Windows icons. 2022, Nick Heim
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -419,18 +421,6 @@ class AppIconExtractor(DmgMounter):
         # So we take the head image and resize it to 256px.
         # Improvements are welcome.
         if is_windows():
-            # if (1024, 1024) in bg.info["sizes"]:
-                # self.output("Resizing 1024 icon to 256px.")
-                # bg = bg.resize((256, 256))
-            # elif (512, 512) in bg.info["sizes"]:
-                # self.output("Resizing 512 icon to 256px.")
-                # bg = bg.resize((256, 256))
-            # elif (256, 256) in bg.info["sizes"]:
-                # bg.size = (256, 256)
-            # else:
-                # self.output("Resizing icon to 256px.")
-                # bg = bg.resize((256, 256))
-
             if bg.format == 'ICO':
                 if (1024, 1024) in bg.info["sizes"]:
                     self.output("Resizing 1024 icon to 256px.")
@@ -459,6 +449,11 @@ class AppIconExtractor(DmgMounter):
             else:
                 self.output("Unrecognizeable image format! Not ICO or PNG.")
         bg.convert("RGBA")
+        # Check the file mode. If it was not changed to "RBGA",
+        # the source is most likeley grayscale.
+        # So we create an new empty color image and copy the background image to it.
+        # Otherwise, we can not stamp a color forground image to it.
+        # It would end up in grayscale too.
         if not bg.mode == "RGBA":
             img = Image.new("RGBA", (256,256), color=(0,0,0))
             img.paste(bg, (0,0))
