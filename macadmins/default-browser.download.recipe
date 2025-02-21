@@ -3,7 +3,8 @@
 <plist version="1.0">
     <dict>
         <key>Description</key>
-        <string>Downloads the latest version of the default-browser, A command line utility for setting the default browser for a user on macOS.</string>
+        <string>Downloads the latest version of the default-browser, a command line utility for
+            setting the default browser for a user on macOS.</string>
         <key>Identifier</key>
         <string>com.github.haircut.download.default-browser</string>
         <key>Input</key>
