@@ -211,11 +211,14 @@ class AppIconExtractor(DmgMounter):
             if filetype_raw.find("MSI Installer") >= 0:
                 filetype_def = "msi"
                 self.output("Inside get_filetype msi")
-            elif filetype_raw.find("executable (DLL)") >= 0:
+            # elif filetype_raw.find("executable (DLL)") >= 0:
+            elif ("executable" in filetype_raw and "(DLL)" in filetype_raw):
                 filetype_def = "dll"
-            elif filetype_raw.find("executable (GUI)") >= 0:
+            # elif filetype_raw.find("executable (GUI)") >= 0:
+            elif ("executable" in filetype_raw and "(GUI)" in filetype_raw):
                 filetype_def = "exe"
-            elif filetype_raw.find("executable (console)") >= 0:
+            # elif filetype_raw.find("executable (console)") >= 0:
+            elif ("executable" in filetype_raw and "(console)" in filetype_raw):            
                 filetype_def = "exe"
             elif filetype_raw.find("Windows icon resource") >= 0:
                 filetype_def = "ico"
