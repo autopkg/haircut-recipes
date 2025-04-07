@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from autopkglib import Processor, ProcessorError  # noqa: F401
 
@@ -74,7 +74,7 @@ class DatetimeOutputter(Processor):
         current_datetime = datetime.now()
         if self.env.get("use_utc", False):
             self.output("Using UTC instead of local time.", verbose_level=2)
-            current_datetime = current_datetime.utcnow()
+            current_datetime = current_datetime.now(timezone.utc)
 
         # Format and output the datetime using the specified format, or the
         # default format ISO 8601 format.

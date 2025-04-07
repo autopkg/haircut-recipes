@@ -3,17 +3,17 @@
 <plist version="1.0">
     <dict>
         <key>Description</key>
-        <string>Downloads the latest version of Cloudflare WARP for teams from the Cloudflare AppCenter feed and imports into Munki.</string>
+        <string>Downloads the latest version of Floorp and imports into Munki.</string>
         <key>Identifier</key>
-        <string>com.github.haircut.munki.CloudflareWARPTeams</string>
+        <string>com.github.haircut.munki.Floorp</string>
         <key>ParentRecipe</key>
-        <string>com.github.haircut.download.CloudflareWARPTeams</string>
+        <string>com.github.haircut.download.Floorp</string>
         <key>Input</key>
         <dict>
             <key>MUNKI_REPO_SUBDIR</key>
-            <string>apps/Cloudflare WARP</string>
+            <string>apps/Ablaze</string>
             <key>NAME</key>
-            <string>Cloudflare WARP</string>
+            <string>Floorp</string>
             <key>pathname</key>
             <string>%pathname%</string>
             <key>pkginfo</key>
@@ -23,28 +23,13 @@
                     <string>testing</string>
                 </array>
                 <key>description</key>
-                <string>The Cloudflare WARP client allows individuals and organizations to have a faster, more secure, and more private experience online.
-
-The WARP client sits between your device and the Internet, and has several connection modes to better suit different needs.</string>
+                <string>Floorp is a new Firefox based browser from Japan with excellent privacy &amp; flexibility.</string>
                 <key>developer</key>
-                <string>Cloudflare Inc</string>
+                <string>Ablaze</string>
                 <key>display_name</key>
-                <string>Cloudflare WARP</string>
+                <string>Floorp</string>
                 <key>name</key>
                 <string>%NAME%</string>
-                <key>blocking_applications</key>
-                <array>
-                    <string>Updater.app</string>
-                    <string>LoginLauncherApp.app</string>
-                    <string>Cloudflare WARP.app</string>
-                </array>
-                <key>uninstall_method</key>
-                <string>uninstall_script</string>
-                <key>uninstall_script</key>
-                <string>#!/usr/bin/env bash
-set -u
-/Applications/Cloudflare\ WARP.app/Contents/Resources/uninstall.sh -f
-</string>
                 <key>unattended_install</key>
                 <true/>
                 <key>unattended_uninstall</key>
@@ -52,7 +37,7 @@ set -u
             </dict>
         </dict>
         <key>MinimumVersion</key>
-        <string>1.0.0</string>
+        <string>2.3</string>
         <key>Process</key>
         <array>
             <dict>

@@ -11,7 +11,7 @@
         <key>NAME</key>
         <string>TOPCAT</string>
         <key>url</key>
-        <string>http://www.star.bris.ac.uk/~mbt/topcat/topcat-full.dmg</string>
+        <string>https://www.star.bris.ac.uk/~mbt/topcat/topcat-all.dmg</string>
     </dict>
     <key>MinimumVersion</key>
     <string>1.0.0</string>
