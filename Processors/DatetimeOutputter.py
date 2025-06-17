@@ -15,6 +15,7 @@
 # limitations under the License.
 
 from datetime import datetime, timedelta, timezone
+import re
 
 from autopkglib import Processor, ProcessorError  # noqa: F401
 
@@ -88,24 +89,30 @@ class DatetimeOutputter(Processor):
         deltas = self.env.get("deltas")
         if deltas:
             self.output("Calculating time deltas.", verbose_level=2)
-            for delta in deltas:
+            for delta_index, delta in enumerate(deltas):
                 try:
-                    # Calculate the final datetime.
                     diff = timedelta(**delta["interval"])
                     if delta["direction"] == "past":
-                        final = current_datetime - diff
+                        base_datetime = current_datetime - diff
                     else:
-                        final = current_datetime + diff
-                    # Output using the supplied output_name and dattime_format,
-                    # or the default ISO 8601 format.
-                    output_format = delta.get(
-                        "datetime_format", "%Y-%m-%dT%H:%M:%S.%f%z"
-                    )
-                    self.env[delta["output_name"]] = final.strftime(output_format)
-                except (TypeError, NameError) as e:
-                    raise ProcessorError(
-                        f"Missing or incorrectly-named required keys in time delta: {e}"
-                    )
+                        base_datetime = current_datetime + diff
+                    format_string = delta.get("format", "%Y-%m-%dT%H:%M:%S.%f%z")
+                    # Check if the format string hardcodes a time (e.g., ends with 'T17:55:00Z')
+                    # This regex looks for a literal time at the end of the format string, e.g. T17:55:00Z
+                    hardcoded_time_regex = r".*T(\d{2}):(\d{2}):(\d{2})Z$"
+                    hardcoded_time_match = re.match(hardcoded_time_regex, format_string)
+                    if hardcoded_time_match:
+                        # If a hardcoded time is found, set the base_datetime to that time
+                        hour, minute, second = map(int, hardcoded_time_match.groups())
+                        base_datetime = base_datetime.replace(hour=hour, minute=minute, second=second, microsecond=0)
+                    formatted_datetime = base_datetime.strftime(format_string)
+                    output_var_name = delta["output_name"]
+                    self.env[output_var_name] = formatted_datetime
+                    # Print the output variable and value to stdout for recipe visibility
+                    self.output(f"Done setting {output_var_name} to: {formatted_datetime}")
+                except (TypeError, NameError, ValueError) as delta_err:
+                    self.output(f"Error processing delta #{delta_index + 1}: {str(delta_err)}")
+                    continue
 
 
 if __name__ == "__main__":
