@@ -20,7 +20,7 @@ details and additional examples.
 
 ### Input variables
 
-- **datetime\_format:**
+- **format:**
   - **required:** False
   - **description:** An optional Python strftime-compatible datetime format.  
     See <https://strftime.org/> for examples. Defaults to ISO 8601 format.
