@@ -2,6 +2,8 @@
 #
 # Copyright 2022 Matthew Warren
 #
+# Extended to work with Windows icons. 2022, Nick Heim
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,16 +24,36 @@ Important! You *must* install the Pillow library to AutoPkg's Python framework.
 You can do this by running:
 
 /usr/local/autopkg/python -m pip install --upgrade Pillow
+And on Windows:
+pip install icoextract
 """
 
 import plistlib
 import base64
 import io
 import os
+import sys
+
 
 from autopkglib import Processor, ProcessorError
 from autopkglib.DmgMounter import DmgMounter
+from autopkglib import is_mac, is_windows
 
+if is_windows():
+    import msilib
+    try:
+        import icoextract
+        import magic
+        import warnings
+    except (ImportError, ModuleNotFoundError):
+        raise ProcessorError(
+            "The icoextract and magic libraries are required, but where not found. "
+            "Please run the following command to install the libraries: "
+            "pip install python-magic"
+            "pip install python-magic-bin"
+            "pip install icoextract"
+        )
+    warnings.simplefilter('ignore')
 try:
     from PIL import Image
 except (ImportError, ModuleNotFoundError):
@@ -62,6 +84,16 @@ class AppIconExtractor(DmgMounter):
             "Can point to a path inside a .dmg which will be mounted. This "
             "path may also contain basic globbing characters such as the "
             "wildcard '*', but only the first result will be returned.",
+        },
+        "icon_file_number": {
+            "required": False,
+            "default": 0,
+            "description": "Numbered index of the icon to get.",
+        },
+        "msi_icon_name": {
+            "required": False,
+            "default": "*",
+            "description": "Name of the icon entry in the icon table.",
         },
         "icon_output_path": {
             "required": False,
@@ -157,7 +189,50 @@ class AppIconExtractor(DmgMounter):
         except Exception:
             return False
 
-    def get_app_icon_path(self, app_path: str) -> str:
+    def get_filetype(self, full_file_path: str) -> str:
+        """Returns the file type as 3 char string (exe, dll, msi, png, ico).
+
+        Arguments:
+            full_file_path: full path to the file to check.
+
+        Returns:
+            file type as 3 char string.
+        """
+        if not os.path.exists(full_file_path):
+            return None
+
+        if is_mac():
+            return None
+            # If the need arises to use this on OSX too, 
+            # implement it here...
+
+        if is_windows():
+            filetype_raw = magic.from_file(full_file_path)
+            if filetype_raw.find("MSI Installer") >= 0:
+                filetype_def = "msi"
+                self.output("Inside get_filetype msi")
+            # elif filetype_raw.find("executable (DLL)") >= 0:
+            elif ("executable" in filetype_raw and "(DLL)" in filetype_raw):
+                filetype_def = "dll"
+            # elif filetype_raw.find("executable (GUI)") >= 0:
+            elif ("executable" in filetype_raw and "(GUI)" in filetype_raw):
+                filetype_def = "exe"
+            # elif filetype_raw.find("executable (console)") >= 0:
+            elif ("executable" in filetype_raw and "(console)" in filetype_raw):            
+                filetype_def = "exe"
+            elif filetype_raw.find("Windows icon resource") >= 0:
+                filetype_def = "ico"
+            elif filetype_raw.find("PNG image") >= 0:
+                filetype_def = "png"
+            else:
+                self.output("Could not determine file type. Exiting")
+                return None
+        self.output("Inside get_filetype")
+        self.output(filetype_def)
+        full_file_path = ""
+        return filetype_def
+
+    def get_app_icon_path(self, app_path: str, icon_number: int) -> str:
         """Returns the full path to the app icon specified in an app's
         Info.plist file if possible.
 
@@ -166,28 +241,50 @@ class AppIconExtractor(DmgMounter):
 
         Returns:
             string path to the app icon, or None if unable to find it
+        
+        Windows:
+            Extracts the icon-group from a PE-file to ICO-file.
+            Returns the path to the extracted ICO-file.
+            An ICO-file can be red by the following (PIL-) functions.
         """
         if not os.path.exists(app_path):
             return None
-        try:
-            with open(os.path.join(app_path, "Contents/Info.plist"), "rb") as app_plist:
-                info = plistlib.load(app_plist)
-        except plistlib.InvalidFileException:
-            return None
-        # Read the CFBundleIconFile property, or try using the app's name if
-        # that property doesn't exist. This won't catch every case of poor app
-        # construction but it will catch some.
-        app_name = os.path.basename(app_path)
-        icon_filename = info.get("CFBundleIconFile", app_name)
-        icon_path = os.path.join(app_path, "Contents/Resources", icon_filename)
-        # Add .icns if missing
-        if not os.path.splitext(icon_path)[1]:
-            icon_path += ".icns"
+        if is_mac():                                                                                        
+            try:
+                with open(os.path.join(app_path, "Contents/Info.plist"), "rb") as app_plist:
+                    info = plistlib.load(app_plist)
+            except plistlib.InvalidFileException:
+                return None
+
+            # Read the CFBundleIconFile property, or try using the app's name if
+            # that property doesn't exist. This won't catch every case of poor app
+            # construction but it will catch some.
+            app_name = os.path.basename(app_path)
+            icon_filename = info.get("CFBundleIconFile", app_name)
+            icon_path = os.path.join(app_path, "Contents/Resources", icon_filename)
+            # Add .icns if missing
+            if not os.path.splitext(icon_path)[1]:
+                icon_path += ".icns"
+
+        if is_windows():
+            # if app_path and os.path.isfile(app_path):
+            # if app_path:
+            self.output(app_path)
+            file_name, file_ext = os.path.splitext(app_path)
+            icon_path = file_name + ".ico"
+            try:
+                icoExtInst = icoextract.IconExtractor(app_path)
+            except RuntimeError:
+                f"Unable to open {app_path} icon extraction."
+            icoExtInst.export_icon(icon_path, num=icon_number)
+            self.output(icon_path)
+
         if os.path.exists(icon_path):
             return icon_path
         return None
 
     def save_icon_to_destination(self, input_path: str, output_path: str) -> str:
+    # def save_icon_to_destination(self, input_path: str, output_path: str, icon_number: int) -> str:
         """Copies the input icns file path to the output file path as a png.
 
         Arguments:
@@ -197,19 +294,56 @@ class AppIconExtractor(DmgMounter):
         Returns:
             full path to the output file, or None if the operation failed
         """
+
         try:
             icon = Image.open(input_path)
-            if (128, 128, 2) in icon.info["sizes"]:
-                icon.size = (128, 128, 2)
-            elif (256, 256) in icon.info["sizes"]:
-                icon.size = (256, 256)
-            else:
-                self.output("Resizing icon to 256px.")
-                icon = icon.resize((256, 256))
+            # self.output(icon.info["sizes"])
+            if is_mac():
+                if (128, 128, 2) in icon.info["sizes"]:
+                    icon.size = (128, 128, 2)
+                    self.output("128")
+                elif (256, 256) in icon.info["sizes"]:
+                    icon.size = (256, 256)
+                else:
+                    self.output("Resizing icon to 256px.")
+                    icon = icon.resize((256, 256))
+
+            if is_windows():
+                if icon.format == 'ICO':
+                    if (1024, 1024) in icon.info["sizes"]:
+                        self.output("Resizing 1024 icon to 256px.")
+                        icon = icon.resize((256, 256))
+                    elif (512, 512) in icon.info["sizes"]:
+                        self.output("Resizing 512 icon to 256px.")
+                        icon = icon.resize((256, 256))
+                    elif (256, 256) in icon.info["sizes"]:
+                        icon.size = (256, 256)
+                    else:
+                        self.output("Resizing icon to 256px.")
+                        icon = icon.resize((256, 256))
+                elif icon.format == 'PNG':
+                    if icon.size == (1024, 1024):
+                        self.output("Resizing 1024 icon to 256px.")
+                        icon = icon.resize((256, 256))
+                    elif icon.size == (512, 512):
+                        self.output("Resizing 512 icon to 256px.")
+                        icon = icon.resize((256, 256))
+                    elif icon.size == (256, 256):
+                        # icon.size = (256, 256)
+                        self.output("No resize, already 256px.")
+                    else:
+                        self.output("Resizing icon to 256px.")
+                        icon = icon.resize((256, 256))
+                else:
+                    self.output("Unrecognizeable im<age format! Not ICO or PNG.")
+
+            self.output(icon.size)
+            # icon.ico.getimage(icon.size)
             icon.convert("RGBA")
             icon.load()
             icon.save(output_path, format="png")
             return output_path
+
         except PermissionError:
             raise ProcessorError(
                 f"Unable to save app icon to {output_path} due to permissions."
@@ -278,14 +412,55 @@ class AppIconExtractor(DmgMounter):
         #   3. It might be confusing and complicate error handling if a recipe
         #      passed a larger representation that may not be available.
         #   4. PRs accepted for improvements :)
-        if (128, 128, 2) in bg.info["sizes"]:
-            bg.size = (128, 128, 2)
-        elif (256, 256) in bg.info["sizes"]:
-            bg.size = (256, 256)
-        else:
-            self.output("Resizing icon to 256px.")
-            bg = bg.resize((256, 256))
+        if is_mac():
+            if (128, 128, 2) in bg.info["sizes"]:
+                bg.size = (128, 128, 2)
+            elif (256, 256) in bg.info["sizes"]:
+                bg.size = (256, 256)
+            else:
+                self.output("Resizing icon to 256px.")
+                bg = bg.resize((256, 256))
+        # Could not figure out so far, how to extract embedded icons from the file.
+        # So we take the head image and resize it to 256px.
+        # Improvements are welcome.
+        if is_windows():
+            if bg.format == 'ICO':
+                if (1024, 1024) in bg.info["sizes"]:
+                    self.output("Resizing 1024 icon to 256px.")
+                    bg = bg.resize((256, 256))
+                elif (512, 512) in bg.info["sizes"]:
+                    self.output("Resizing 512 icon to 256px.")
+                    bg = bg.resize((256, 256))
+                elif (256, 256) in bg.info["sizes"]:
+                    bg.size = (256, 256)
+                else:
+                    self.output("Resizing icon to 256px.")
+                    bg = bg.resize((256, 256))
+            elif bg.format == 'PNG':
+                if bg.size == (1024, 1024):
+                    self.output("Resizing 1024 icon to 256px.")
+                    bg = bg.resize((256, 256))
+                elif bg.size == (512, 512):
+                    self.output("Resizing 512 icon to 256px.")
+                    bg = bg.resize((256, 256))
+                elif bg.size == (256, 256):
+                    # bg.size = (256, 256)
+                    self.output("No resize, already 256px.")
+                else:
+                    self.output("Resizing icon to 256px.")
+                    bg = bg.resize((256, 256))
+            else:
+                self.output("Unrecognizeable image format! Not ICO or PNG.")
         bg.convert("RGBA")
+        # Check the file mode. If it was not changed to "RBGA",
+        # the source is most likeley grayscale.
+        # So we create an new empty color image and copy the background image to it.
+        # Otherwise, we can not stamp a color forground image to it.
+        # It would end up in grayscale too.
+        if not bg.mode == "RGBA":
+            img = Image.new("RGBA", (256,256), color=(0,0,0))
+            img.paste(bg, (0,0))
+            bg = img.copy()
         bg.load()
         # Open the foreground template
         fg = Image.open(foreground).convert("RGBA")
@@ -309,7 +484,8 @@ class AppIconExtractor(DmgMounter):
         # re-specifies the foreground as the paste mask to preserve
         # transparency.
         composite = bg.copy()
-        composite.paste(fg, coords, fg)
+        # composite.paste(fg, coords, fg)
+        composite.paste(fg, coords)
         try:
             composite.save(output_path, format="png")
         except IOError:
@@ -321,19 +497,72 @@ class AppIconExtractor(DmgMounter):
 
         return output_path
 
+    def get_msi_icon_lib(self, app_path: str, icon_name: str) -> str:
+        """Windows: Extracts the icon library from the msi-file.
+        It returns the full path to the msi icon library in the cache folder.
+
+        Arguments:
+            app_path: path to the msi file
+
+        Returns:
+            string path to the icon library, or None if unable to find it
+        
+        """
+        if not os.path.exists(app_path):
+            return None
+
+        if is_mac():
+            return None
+
+        if is_windows():
+            self.output(app_path)
+            self.output("Inside_Get_MSI_Icon_Lib")
+            file_name, file_ext = os.path.splitext(app_path)
+            icon_path = file_name + ".ico"
+            sys.path.append(self.env['DTF_PATH'])
+            self.output(icon_name)
+            icon_path = self.env["RECIPE_CACHE_DIR"] + "\downloads\MSI_ICON_LIB.exe"
+            import clr
+            clr.AddReference("Microsoft.Deployment.WindowsInstaller")
+            from Microsoft.Deployment.WindowsInstaller import Database
+            from Microsoft.Deployment.WindowsInstaller import DatabaseOpenMode
+            tmode = DatabaseOpenMode.ReadOnly
+            win_inst_db = Database(app_path, tmode)
+            if icon_name == "*":
+                win_inst_view = win_inst_db.OpenView("SELECT `Name`,`Data` FROM Icon",None)
+            else:
+                win_inst_view = win_inst_db.OpenView("SELECT `Name`,`Data` FROM Icon WHERE `Name`= '" + icon_name +"'",None)
+            win_inst_view.Execute()
+            win_inst_rec = win_inst_view.Fetch()
+            if not win_inst_rec == None:
+                win_inst_rec.GetStream(2, icon_path)
+                if icon_name == "*":
+                    icon_name = win_inst_rec.GetString(1)
+            else:
+                self.output("Unable to extract icon from MSI")
+
+            win_inst_rec.Dispose()
+            win_inst_view.Dispose()
+            win_inst_db.Dispose()
+            
+            # try:
+                # icoExtInst = icoextract.IconExtractor(app_path)
+            # except RuntimeError:
+                # f"Unable to open {app_path} icon extraction."
+            # icoExtInst.export_icon(icon_path, num=icon_number)
+            self.output(icon_path)
+
+        if os.path.exists(icon_path):
+            return icon_path
+        return None
+
     def main(self):
         """Main"""
-        # Retrieve or set a default output path for the app icon
-        if self.env.get("icon_output_path"):
-            app_icon_output_path = self.env.get("icon_output_path")
-        else:
-            recipe_dir = self.env["RECIPE_CACHE_DIR"]
-            icon_name = self.env["NAME"]
-            app_icon_output_path = os.path.join(recipe_dir, icon_name + ".png")
-
         # Retrieve the app path
         source_app = self.env.get("source_app")
 
+        # Read the icon number from the input var.
+        icon_file_number = int(self.env.get("icon_file_number", 0))
         # Determine if the app path is within a dmg
         (dmg_path, dmg, dmg_app_path) = self.parsePathForDMG(source_app)
         if dmg:
@@ -344,12 +573,55 @@ class AppIconExtractor(DmgMounter):
             # Use the source path as-is, assuming it's a full path to a .app
             app_path = source_app
 
-        # Extract the app icon to the destination path
-        app_icon_path = self.get_app_icon_path(app_path)
-        if not app_icon_path:
-            raise ProcessorError(
-                f"Unable to determine app icon path for app at {app_path}."
-            )
+        if is_windows():
+            src_app_file, src_file_ext = os.path.splitext(source_app)
+            file_type_ext = self.get_filetype(source_app)
+            self.output("Main_Win")
+            self.output(src_file_ext)
+            # if src_file_ext == ".msi":
+            if file_type_ext == "msi":
+                msi_icon_name = self.env.get("msi_icon_name")
+                self.output("MainWinMSI")
+                app_icon_path_temp = self.get_msi_icon_lib(source_app, msi_icon_name)
+                file_type_ext = self.get_filetype(app_icon_path_temp)
+                self.output(app_icon_path_temp)
+                self.output("MainWinMSI")
+                self.output(file_type_ext)
+                if file_type_ext == "exe" or file_type_ext == "dll":
+                    app_icon_path = self.get_app_icon_path(app_icon_path_temp, icon_file_number)
+                    self.output(app_icon_path_temp)
+                elif file_type_ext == "ico":
+                    app_icon_path = app_icon_path_temp
+                else:
+                    self.output("Could not determine file type from MSI. Exiting")
+                    return None
+            elif file_type_ext == "exe":
+                app_icon_path = self.get_app_icon_path(source_app, icon_file_number)
+            elif file_type_ext == "png":
+                app_icon_path = source_app
+            elif file_type_ext == "ico":
+                app_icon_path = source_app
+            else:
+                self.output("Could not determine input file type. Exiting")
+                return None
+        else:
+            # Extract the app icon to the destination path
+            app_icon_path = self.get_app_icon_path(app_path, icon_file_number)
+            if not app_icon_path:
+                raise ProcessorError(
+                    f"Unable to determine app icon path for app at {app_path}."
+                )
+            
+        # Retrieve or set a default output path for the app icon
+        if self.env.get("icon_output_path"):
+            app_icon_output_path = self.env.get("icon_output_path")
+            if not os.path.isdir(os.path.dirname(app_icon_output_path)):
+                os.makedirs(os.path.dirname(app_icon_output_path))
+        else:
+            recipe_dir = self.env["RECIPE_CACHE_DIR"]
+            icon_name = self.env["NAME"]
+            app_icon_output_path = os.path.join(recipe_dir, icon_name + ".png")
+        
         icon_path = self.save_icon_to_destination(app_icon_path, app_icon_output_path)
         self.env["app_icon_path"] = icon_path
 
