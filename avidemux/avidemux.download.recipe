@@ -14,7 +14,7 @@
         <key>NAME</key>
         <string>avidemux</string>
         <key>SEARCH_URL</key>
-        <string>http://www.fosshub.com/Avidemux.html</string>
+        <string>https://www.fosshub.com/Avidemux.html</string>
         <key>SEARCH_PATTERN</key>
         <string>\/Avidemux.html.(Avidemux_([0-9].[0-9].[0-9])_Sierra_64Bits_Qt5)\.dmg</string>
         <key>SEARCH_PATTERN2</key>
@@ -32,7 +32,7 @@
             <key>Arguments</key>
             <dict>
                 <key>url</key>
-                <string>http://www.fosshub.com/Avidemux.html</string>
+                <string>https://www.fosshub.com/Avidemux.html</string>
                 <key>re_pattern</key>
                 <string>%SEARCH_PATTERN%</string>
             </dict>
@@ -43,7 +43,7 @@
             <key>Arguments</key>
             <dict>
                 <key>url</key>
-                <string>http://www.fosshub.com/Avidemux.html/%match%.dmg</string>
+                <string>https://www.fosshub.com/Avidemux.html/%match%.dmg</string>
                 <key>re_pattern</key>
                 <string>%SEARCH_PATTERN2%</string>
             </dict>
