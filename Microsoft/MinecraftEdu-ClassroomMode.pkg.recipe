@@ -14,7 +14,7 @@
     <key>MinimumVersion</key>
     <string>1.0.0</string>
     <key>ParentRecipe</key>
-    <string>com.github.haircut.download.MinecraftEdu-ClassroomMode</string>
+    <string>com.github.aysiu.download.ClassroomMode</string>
     <key>Process</key>
     <array>
         <dict>
