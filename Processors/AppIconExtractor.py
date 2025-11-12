@@ -200,7 +200,7 @@ class AppIconExtractor(DmgMounter):
         try:
             icon = Image.open(input_path)
             if (128, 128, 2) in icon.info["sizes"]:
-                icon.size = (128, 128, 2)
+                icon.size = (256, 256)
             elif (256, 256) in icon.info["sizes"]:
                 icon.size = (256, 256)
             else:
@@ -279,7 +279,7 @@ class AppIconExtractor(DmgMounter):
         #      passed a larger representation that may not be available.
         #   4. PRs accepted for improvements :)
         if (128, 128, 2) in bg.info["sizes"]:
-            bg.size = (128, 128, 2)
+            bg.size = (256, 256)
         elif (256, 256) in bg.info["sizes"]:
             bg.size = (256, 256)
         else:
