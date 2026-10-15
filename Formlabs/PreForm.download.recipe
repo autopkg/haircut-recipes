@@ -3,13 +3,15 @@
 <plist version="1.0">
 <dict>
     <key>Description</key>
-    <string>Downloads latest PreForm disk image.</string>
+    <string>Downloads latest PreForm disk image. Defaults to Apple silicon; set DOWNLOAD_NAME to preform for Intel.</string>
     <key>Identifier</key>
     <string>com.github.haircut.download.PreForm</string>
     <key>Input</key>
     <dict>
         <key>NAME</key>
         <string>PreForm</string>
+        <key>DOWNLOAD_NAME</key>
+        <string>preform-arm64</string>
     </dict>
     <key>MinimumVersion</key>
     <string>1.0.0</string>
@@ -17,26 +19,13 @@
     <array>
         <dict>
             <key>Processor</key>
-            <string>URLTextSearcher</string>
-            <key>Arguments</key>
-            <dict>
-                <key>re_pattern</key>
-                <string>(https://downloads\.formlabs\.com/PreForm/Release/([0-9]+(\.[0-9]+)+)/PreForm_mac_([0-9]+(\.[0-9]+)+).*?\.dmg)</string>
-                <key>result_output_var_name</key>
-                <string>match</string>
-                <key>url</key>
-                <string>https://formlabs.com/download-preform-mac/</string>
-            </dict>
-        </dict>
-        <dict>
-            <key>Processor</key>
             <string>URLDownloader</string>
             <key>Arguments</key>
             <dict>
                 <key>url</key>
-                <string>%match%</string>
+                <string>https://downloads.formlabs.com/PreForm/Release/%DOWNLOAD_NAME%.dmg</string>
                 <key>filename</key>
-                <string>%NAME%.dmg</string>
+                <string>%DOWNLOAD_NAME%.dmg</string>
             </dict>
         </dict>
         <dict>
